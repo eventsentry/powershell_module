@@ -363,11 +363,11 @@
       <command:verb>Add</command:verb>
       <command:noun>ESVariable</command:noun>
       <maml:description>
-        <maml:para>{{ Defines a new variable }}</maml:para>
+        <maml:para>{{ Adds a new variable to EventSentry }}</maml:para>
       </maml:description>
     </command:details>
     <maml:description>
-      <maml:para>{{ Defines a new variable }}</maml:para>
+      <maml:para>{{ Adds a new variable to EventSentry }}</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -452,7 +452,7 @@
     <command:examples>
       <command:example>
         <maml:title>-------------------------- Example 1 --------------------------</maml:title>
-        <dev:code>PS C:\&gt; {{ Add-ESVariable EMAILRECIPIENT first.lastname@yourcompany.com }}</dev:code>
+        <dev:code>PS C:\&gt; {{ Add-Variable EMAILRECIPIENT first.lastname@yourcompany.com }}</dev:code>
         <dev:remarks>
           <maml:para>{{ Adds a new EMAILRECIPIENT variable with the default value of first.lastname@yourcompany.com }}</maml:para>
         </dev:remarks>
@@ -541,35 +541,23 @@
   </command:command>
   <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
     <command:details>
-      <command:name>Remove-ESHost</command:name>
+      <command:name>Remove-ESGroup</command:name>
       <command:verb>Remove</command:verb>
-      <command:noun>ESHost</command:noun>
+      <command:noun>ESGroup</command:noun>
       <maml:description>
-        <maml:para>{{ Removes a host from a group }}</maml:para>
+        <maml:para>{{ Deletes a group }}</maml:para>
       </maml:description>
     </command:details>
     <maml:description>
-      <maml:para>{{ Removes a host from a group }}</maml:para>
+      <maml:para>{{ Deletes a group }}</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
-        <maml:name>Remove-ESHost</maml:name>
+        <maml:name>Remove-ESGroup</maml:name>
         <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="0" aliases="none">
           <maml:name>Group</maml:name>
           <maml:description>
-            <maml:para>{{ Name of the group from which the host should be removed from }}</maml:para>
-          </maml:description>
-          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
-          <dev:type>
-            <maml:name>String</maml:name>
-            <maml:uri />
-          </dev:type>
-          <dev:defaultValue>None</dev:defaultValue>
-        </command:parameter>
-        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
-          <maml:name>Hostname</maml:name>
-          <maml:description>
-            <maml:para>{{ Host to remove }}</maml:para>
+            <maml:para>{{ Name of the group to delete }}</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
           <dev:type>
@@ -584,7 +572,98 @@
       <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="0" aliases="none">
         <maml:name>Group</maml:name>
         <maml:description>
-          <maml:para>{{ Name of the group from which the host should be removed from }}</maml:para>
+          <maml:para>{{ Name of the group to delete }}</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+    </command:parameters>
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>None</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:inputType>
+    </command:inputTypes>
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>System.Object</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:returnValue>
+    </command:returnValues>
+    <maml:alertSet>
+      <maml:alert>
+        <maml:para></maml:para>
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>-------------------------- Example 1 --------------------------</maml:title>
+        <dev:code>PS C:\&gt; {{ Remove-ESGroup "Network Devices" }}</dev:code>
+        <dev:remarks>
+          <maml:para>{{ Removes the "Network Devices" group }}</maml:para>
+        </dev:remarks>
+      </command:example>
+    </command:examples>
+    <command:relatedLinks />
+  </command:command>
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+    <command:details>
+      <command:name>Remove-ESHost</command:name>
+      <command:verb>Remove</command:verb>
+      <command:noun>ESHost</command:noun>
+      <maml:description>
+        <maml:para>{{ Removes a host }}</maml:para>
+      </maml:description>
+    </command:details>
+    <maml:description>
+      <maml:para>{{ Removes a host }}</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <maml:name>Remove-ESHost</maml:name>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="0" aliases="none">
+          <maml:name>Group</maml:name>
+          <maml:description>
+            <maml:para>{{ Name of the group the host is a member of }}</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
+          <maml:name>Hostname</maml:name>
+          <maml:description>
+            <maml:para>{{ Name of the host to remove }}</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters>
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="0" aliases="none">
+        <maml:name>Group</maml:name>
+        <maml:description>
+          <maml:para>{{ Name of the group the host is a member of }}</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
         <dev:type>
@@ -596,7 +675,7 @@
       <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
         <maml:name>Hostname</maml:name>
         <maml:description>
-          <maml:para>{{ Host to remove }}</maml:para>
+          <maml:para>{{ Name of the host to remove }}</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
         <dev:type>
@@ -787,7 +866,7 @@
         <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
           <maml:name>PropertyValue</maml:name>
           <maml:description>
-            <maml:para>{{ The value of the property to be set, for boolean values use "yes", "no", "true" or "false" }}</maml:para>
+            <maml:para>{{ The value of the property to be set }}</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
           <dev:type>
@@ -826,7 +905,7 @@
       <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
         <maml:name>PropertyValue</maml:name>
         <maml:description>
-          <maml:para>{{ The value of the property to be set, for boolean values use "yes", "no", "true" or "false" }}</maml:para>
+          <maml:para>{{ The value of the property to be set }}</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
         <dev:type>
@@ -991,9 +1070,9 @@
     <command:examples>
       <command:example>
         <maml:title>-------------------------- Example 1 --------------------------</maml:title>
-        <dev:code>PS C:\&gt; {{ Set-ESVariable EMAILRECIPIENT admin.john@yourcompany.com "Network Devices" }}</dev:code>
+        <dev:code>PS C:\&gt; {{ Add example code here }}</dev:code>
         <dev:remarks>
-          <maml:para>{{ Set the value of the variable EMAILRECIPIENT to admin.john@yourcompany.com for all hosts in the "Network Devices" group }}</maml:para>
+          <maml:para>{{ Add example description here }}</maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>

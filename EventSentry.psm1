@@ -308,6 +308,30 @@ function Add-ESGroup
 	saveConfig
 }
 
+function Remove-ESGroup
+{
+    Param(
+        [Parameter(Mandatory=$true)]
+        [string]$Group
+    )
+    $ErrorActionPreference = "Stop"
+    
+    If (ManagementConsoleIsRunning)
+        { throw "EventSentry Management Console is running, only read-only actions can be performed." }
+        
+	$groupExists = Test-ESGroup $Group
+	If ($groupExists -eq $false)
+		{ throw "The specified group $Group does not exist" }
+		
+	$regPathGroup = $ESRegPathGroups + "\" + $Group
+	$regPathGroupX64 = $ESRegPathGroupsX64 + "\" + $Group
+	
+	Remove-Item -Path $regPathGroup -Force
+	Remove-Item -Path $regPathGroupX64 -Force
+	
+	saveConfig
+}
+
 function Set-ESGroupProperty
 {
     Param(
@@ -732,6 +756,7 @@ function Add-ESMaintenance
 #Export-ModuleMember -Function 'Get-ESHosts'
 
 #Export-ModuleMember -Function 'Add-ESGroup'
+#Export-ModuleMember -Function 'Remove-ESGroup'
 #Export-ModuleMember -Function 'Test-ESGroup'
 #Export-ModuleMember -Function 'Set-ESGroupProperty'
 
