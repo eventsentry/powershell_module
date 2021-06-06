@@ -16,3 +16,19 @@ If you get an error message about the module not being loaded, execute:
 The EventSentry PowerShell module should automatically, if it does not then execute:
 
 `Import-Module EventSentry`
+
+# Installation
+Download the zip file and extract all files into an **EventSentry** sub folder, in one of the supported modules directories. You can find out which module directories are in PowerShell's search path with the following command:
+
+`$ENV:PSModulePath`
+
+For example:
+```C:\Program Files\WindowsPowerShell\Modules\EventSentry
+C:\Program Files\PowerShell\7\Modules\EventSentry```
+
+No other steps are necessary to install the EventSentry PowerShell module.
+
+# Usage
+In most cases the module should be automatically loaded as soon as any of the included functions are called. To utilize the module, execute any of its funtions, e.g.
+
+`Get-ESHosts "Default Group"`
