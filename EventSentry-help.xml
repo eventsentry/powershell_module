@@ -363,11 +363,11 @@
       <command:verb>Add</command:verb>
       <command:noun>ESVariable</command:noun>
       <maml:description>
-        <maml:para>{{ Adds a new variable to EventSentry }}</maml:para>
+        <maml:para>{{ Defines a new variable }}</maml:para>
       </maml:description>
     </command:details>
     <maml:description>
-      <maml:para>{{ Adds a new variable to EventSentry }}</maml:para>
+      <maml:para>{{ Defines a new variable }}</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -452,7 +452,7 @@
     <command:examples>
       <command:example>
         <maml:title>-------------------------- Example 1 --------------------------</maml:title>
-        <dev:code>PS C:\&gt; {{ Add-Variable EMAILRECIPIENT first.lastname@yourcompany.com }}</dev:code>
+        <dev:code>PS C:\&gt; {{ Add-ESVariable EMAILRECIPIENT first.lastname@yourcompany.com }}</dev:code>
         <dev:remarks>
           <maml:para>{{ Adds a new EMAILRECIPIENT variable with the default value of first.lastname@yourcompany.com }}</maml:para>
         </dev:remarks>
@@ -624,11 +624,11 @@
       <command:verb>Remove</command:verb>
       <command:noun>ESHost</command:noun>
       <maml:description>
-        <maml:para>{{ Removes a host }}</maml:para>
+        <maml:para>{{ Removes a host from a group }}</maml:para>
       </maml:description>
     </command:details>
     <maml:description>
-      <maml:para>{{ Removes a host }}</maml:para>
+      <maml:para>{{ Removes a host from a group }}</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -636,7 +636,7 @@
         <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="0" aliases="none">
           <maml:name>Group</maml:name>
           <maml:description>
-            <maml:para>{{ Name of the group the host is a member of }}</maml:para>
+            <maml:para>{{ Name of the group from which the host should be removed from }}</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
           <dev:type>
@@ -648,7 +648,7 @@
         <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
           <maml:name>Hostname</maml:name>
           <maml:description>
-            <maml:para>{{ Name of the host to remove }}</maml:para>
+            <maml:para>{{ Host to remove }}</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
           <dev:type>
@@ -663,7 +663,7 @@
       <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="0" aliases="none">
         <maml:name>Group</maml:name>
         <maml:description>
-          <maml:para>{{ Name of the group the host is a member of }}</maml:para>
+          <maml:para>{{ Name of the group from which the host should be removed from }}</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
         <dev:type>
@@ -675,7 +675,7 @@
       <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
         <maml:name>Hostname</maml:name>
         <maml:description>
-          <maml:para>{{ Name of the host to remove }}</maml:para>
+          <maml:para>{{ Host to remove }}</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
         <dev:type>
@@ -866,7 +866,7 @@
         <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
           <maml:name>PropertyValue</maml:name>
           <maml:description>
-            <maml:para>{{ The value of the property to be set }}</maml:para>
+            <maml:para>{{ The value of the property to be set, for boolean values use "yes", "no", "true" or "false" }}</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
           <dev:type>
@@ -905,7 +905,7 @@
       <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
         <maml:name>PropertyValue</maml:name>
         <maml:description>
-          <maml:para>{{ The value of the property to be set }}</maml:para>
+          <maml:para>{{ The value of the property to be set, for boolean values use "yes", "no", "true" or "false" }}</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
         <dev:type>
@@ -946,6 +946,397 @@
         <dev:code>PS C:\&gt; {{ Set-ESGroupProperty "Network Devices" RequiredErrorCount 3 }}</dev:code>
         <dev:remarks>
           <maml:para>{{ Sets the option "Require X failed accounts before error" to 3 }}</maml:para>
+        </dev:remarks>
+      </command:example>
+    </command:examples>
+    <command:relatedLinks />
+  </command:command>
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+    <command:details>
+      <command:name>Set-ESHostProperty</command:name>
+      <command:verb>Set</command:verb>
+      <command:noun>ESHostProperty</command:noun>
+      <maml:description>
+        <maml:para>{{ Sets notes or custom heartbeat properties for a host }}</maml:para>
+      </maml:description>
+    </command:details>
+    <maml:description>
+      <maml:para>{{ Sets notes or custom heartbeat properties for a host }}</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <maml:name>Set-ESHostProperty</maml:name>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="0" aliases="none">
+          <maml:name>Group</maml:name>
+          <maml:description>
+            <maml:para>{{ Name of the group host is a member of }}</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
+          <maml:name>Hostname</maml:name>
+          <maml:description>
+            <maml:para>{{ Name of the host for which properties should be set }}</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>CollectPingStats</maml:name>
+          <maml:description>
+            <maml:para>{{ Collect ping response times in database }}</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">Boolean</command:parameterValue>
+          <dev:type>
+            <maml:name>Boolean</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>EnableAgent</maml:name>
+          <maml:description>
+            <maml:para>{{ Enable EventSentry agent check }}</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">Boolean</command:parameterValue>
+          <dev:type>
+            <maml:name>Boolean</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>EnablePing</maml:name>
+          <maml:description>
+            <maml:para>{{ Enable ICMP ping check }}</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">Boolean</command:parameterValue>
+          <dev:type>
+            <maml:name>Boolean</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>Notes</maml:name>
+          <maml:description>
+            <maml:para>{{ Sets the notes for the host }}</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>PacketCount</maml:name>
+          <maml:description>
+            <maml:para>{{ Number of packets to send when performing a ping check on the host }}</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">Int32</command:parameterValue>
+          <dev:type>
+            <maml:name>Int32</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>PacketSize</maml:name>
+          <maml:description>
+            <maml:para>{{ ICMP packet size when performing a ping check on the host }}</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">Int32</command:parameterValue>
+          <dev:type>
+            <maml:name>Int32</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>RepeatFailed</maml:name>
+          <maml:description>
+            <maml:para>{{ Toggle option to retry a failed host check before the next monitoring interval }}</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">Boolean</command:parameterValue>
+          <dev:type>
+            <maml:name>Boolean</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>RequiredErrorCount</maml:name>
+          <maml:description>
+            <maml:para>{{ Number of errors that are required before a host check is considered failed }}</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">Int32</command:parameterValue>
+          <dev:type>
+            <maml:name>Int32</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>RequirePing</maml:name>
+          <maml:description>
+            <maml:para>{{ Sets whether a successful PING check is required for TCP and/or EventSentry agent checks }}</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">Boolean</command:parameterValue>
+          <dev:type>
+            <maml:name>Boolean</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>RoundTrip</maml:name>
+          <maml:description>
+            <maml:para>{{ Max allowed ping roundtrip time in ms }}</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">Int32</command:parameterValue>
+          <dev:type>
+            <maml:name>Int32</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>SuccessPercentage</maml:name>
+          <maml:description>
+            <maml:para>{{ Percentage of ICMP packets that need to be replied to in order to consider the check successful }}</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">Int32</command:parameterValue>
+          <dev:type>
+            <maml:name>Int32</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>TcpPorts</maml:name>
+          <maml:description>
+            <maml:para>{{ TCP ports to check, multiple ports can be separated with colon (:) }}</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>CollectPingStats</maml:name>
+        <maml:description>
+          <maml:para>{{ Collect ping response times in database }}</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">Boolean</command:parameterValue>
+        <dev:type>
+          <maml:name>Boolean</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>EnableAgent</maml:name>
+        <maml:description>
+          <maml:para>{{ Enable EventSentry agent check }}</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">Boolean</command:parameterValue>
+        <dev:type>
+          <maml:name>Boolean</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>EnablePing</maml:name>
+        <maml:description>
+          <maml:para>{{ Enable ICMP ping check }}</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">Boolean</command:parameterValue>
+        <dev:type>
+          <maml:name>Boolean</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="0" aliases="none">
+        <maml:name>Group</maml:name>
+        <maml:description>
+          <maml:para>{{ Name of the group host is a member of }}</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
+        <maml:name>Hostname</maml:name>
+        <maml:description>
+          <maml:para>{{ Name of the host for which properties should be set }}</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>Notes</maml:name>
+        <maml:description>
+          <maml:para>{{ Sets the notes for the host }}</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>PacketCount</maml:name>
+        <maml:description>
+          <maml:para>{{ Number of packets to send when performing a ping check on the host }}</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">Int32</command:parameterValue>
+        <dev:type>
+          <maml:name>Int32</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>PacketSize</maml:name>
+        <maml:description>
+          <maml:para>{{ ICMP packet size when performing a ping check on the host }}</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">Int32</command:parameterValue>
+        <dev:type>
+          <maml:name>Int32</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>RepeatFailed</maml:name>
+        <maml:description>
+          <maml:para>{{ Toggle option to retry a failed host check before the next monitoring interval }}</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">Boolean</command:parameterValue>
+        <dev:type>
+          <maml:name>Boolean</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>RequiredErrorCount</maml:name>
+        <maml:description>
+          <maml:para>{{ Number of errors that are required before a host check is considered failed }}</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">Int32</command:parameterValue>
+        <dev:type>
+          <maml:name>Int32</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>RequirePing</maml:name>
+        <maml:description>
+          <maml:para>{{ Sets whether a successful PING check is required for TCP and/or EventSentry agent checks }}</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">Boolean</command:parameterValue>
+        <dev:type>
+          <maml:name>Boolean</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>RoundTrip</maml:name>
+        <maml:description>
+          <maml:para>{{ Max allowed ping roundtrip time in ms }}</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">Int32</command:parameterValue>
+        <dev:type>
+          <maml:name>Int32</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>SuccessPercentage</maml:name>
+        <maml:description>
+          <maml:para>{{ Percentage of ICMP packets that need to be replied to in order to consider the check successful }}</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">Int32</command:parameterValue>
+        <dev:type>
+          <maml:name>Int32</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>TcpPorts</maml:name>
+        <maml:description>
+          <maml:para>{{ TCP ports to check, multiple ports can be separated with colon (:) }}</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+    </command:parameters>
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>None</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:inputType>
+    </command:inputTypes>
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>System.Object</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:returnValue>
+    </command:returnValues>
+    <maml:alertSet>
+      <maml:alert>
+        <maml:para></maml:para>
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>-------------------------- Example 1 --------------------------</maml:title>
+        <dev:code>PS C:\&gt; {{ Set-ESHostProperty "Network Devices" FIREWALL -EnableAgent 0 -PacketCount 8 -TcpPorts 80:443 }}</dev:code>
+        <dev:remarks>
+          <maml:para>{{ Sets the following custom heartbeat properties for host FIREWALL in group "Network Devices": Agent check is disabled, ICMP packet count is set to 8 and TCP ports 80 and 443 are monitored. }}</maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
@@ -1070,9 +1461,9 @@
     <command:examples>
       <command:example>
         <maml:title>-------------------------- Example 1 --------------------------</maml:title>
-        <dev:code>PS C:\&gt; {{ Add example code here }}</dev:code>
+        <dev:code>PS C:\&gt; {{ Set-ESVariable EMAILRECIPIENT admin.john@yourcompany.com "Network Devices" }}</dev:code>
         <dev:remarks>
-          <maml:para>{{ Add example description here }}</maml:para>
+          <maml:para>{{ Set the value of the variable EMAILRECIPIENT to admin.john@yourcompany.com for all hosts in the "Network Devices" group }}</maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>

@@ -332,6 +332,130 @@ function Remove-ESGroup
 	saveConfig
 }
 
+function Set-ESHostProperty
+{
+    Param(
+        [Parameter(Mandatory=$true,Position=0)]
+        [string]$Group,
+        [Parameter(Mandatory=$true,Position=1)]
+        [string]$Hostname,
+        [Parameter(Mandatory=$false)]
+        [bool]$EnableAgent = $false,
+        [Parameter(Mandatory=$false)]
+        [bool]$EnablePing = $true,
+        [Parameter(Mandatory=$false)]
+        [Int32]$PacketCount=4,
+        [Parameter(Mandatory=$false)]
+        [Int32]$PacketSize=32,
+        [Parameter(Mandatory=$false)]
+        [Int32]$SuccessPercentage=50,
+        [Parameter(Mandatory=$false)]
+        [Int32]$RoundTrip=500,
+        [Parameter(Mandatory=$false)]
+        [string]$TcpPorts,
+        [Parameter(Mandatory=$false)]
+        [bool]$RequirePing = $true,
+        [Parameter(Mandatory=$false)]
+        [Int32]$RequiredErrorCount = $true,
+        [Parameter(Mandatory=$false)]
+        [bool]$RepeatFailed = $true,
+        [Parameter(Mandatory=$false)]
+        [bool]$CollectPingStats = $true,
+        [Parameter(Mandatory=$false)]
+        [String]$Notes
+    )
+	
+	$boolToText = @{$true = '1'; $false = '0'}
+	
+    If (ManagementConsoleIsRunning)
+        { throw "EventSentry Management Console is running, only read-only actions can be performed." }
+
+	$groupExists = Test-ESGroup $Group
+	If ($groupExists -eq $false)
+		{ throw "The specified group $Group does not exist" }
+		
+	$hostID = GetHostID $Group $Hostname
+    
+    If ($hostID -eq "")
+        { throw "Host $Hostname does not exist in group $Group" }
+
+	$regPathGroup = $ESRegPathGroups + "\" + $Group
+	$regPathGroupX64 = $ESRegPathGroupsX64 + "\" + $Group
+
+	# Always disable SNMP
+	$regName = $hostID + "_snmp_error"
+	Set-ItemProperty -Path $regPathGroup -Name $regName -Value 1 -Type DWORD -Force | Out-Null
+	Set-ItemProperty -Path $regPathGroupX64 -Name $regName -Value 1 -Type DWORD -Force | Out-Null
+	
+	$regName = $hostID + "_hb_customize"
+	Set-ItemProperty -Path $regPathGroup -Name $regName -Value 1 -Type DWORD -Force | Out-Null
+	Set-ItemProperty -Path $regPathGroupX64 -Name $regName -Value 1 -Type DWORD -Force | Out-Null
+	
+	# Read reg value
+	$regName = $hostID + "_hb_options"
+	
+	# Merge existing settings
+	$hbSettings = Get-ItemPropertyValue $regPathGroup -Name $regName
+	$hbTokens = $hbSettings.Split(":");
+	If ($hbTokens.Count -eq 12)
+	{
+		If ($PSBoundParameters.ContainsKey('EnableAgent') -eq $false) {
+			if ($hbTokens[0] -eq "1") { $EnableAgent = $true }
+		}
+		If ($PSBoundParameters.ContainsKey('EnablePing') -eq $false) {
+			If ($hbTokens[1] -eq "0") { $EnablePing = $true }
+		}
+		
+		If ($PSBoundParameters.ContainsKey('PacketCount') -eq $false) { $PacketCount = $hbTokens[2] }
+		If ($PSBoundParameters.ContainsKey('PacketSize') -eq $false) { $PacketSize = $hbTokens[3] }
+		If ($PSBoundParameters.ContainsKey('SuccessPercentage') -eq $false) { $SuccessPercentage = $hbTokens[4] }
+		If ($PSBoundParameters.ContainsKey('RoundTrip') -eq $false) { $RoundTrip = $hbTokens[5] }
+		If ($PSBoundParameters.ContainsKey('RequiredErrorCount') -eq $false) { $RequiredErrorCount = $hbTokens[9] }
+		
+		If ($PSBoundParameters.ContainsKey('RepeatFailed') -eq $false) {
+			If ($hbTokens[10] -eq "0") { $RepeatFailed = $false }
+		}
+		
+		If ($PSBoundParameters.ContainsKey('CollectPingStats') -eq $false) { $CollectPingStats = $hbTokens[11] }
+	}
+	
+	$regValue = $boolToText[($EnableAgent)] + ":" + $boolToText[($EnablePing)] + ":" + $PacketCount.ToString() + ":" + $PacketSize.ToString() + ":" + $SuccessPercentage.ToString() + ":" + $RoundTrip.ToString() + ":1:500:0:" + $RequiredErrorCount.ToString() + ":" + $boolToText[($RepeatFailed)] + ":" + $boolToText[($CollectPingStats)]
+	Set-ItemProperty -Path $regPathGroup -Name $regName -Value $regValue -Type String -Force | Out-Null
+	Set-ItemProperty -Path $regPathGroupX64 -Name $regName -Value $regValue -Type String -Force | Out-Null
+
+	# TCP Port(s)
+	If ($TcpPorts.Length -gt 0)
+	{
+		$tcpTokens = $TcpPorts.Split(":");
+		
+		For ($i = 0; $i -lt $tcpTokens.Count; $i++)
+		{
+			[Int32]$numPort = $null
+
+			If ([Int32]::TryParse($tcpTokens[$i],[ref]$numPort))
+			{
+				$regName = $hostID + "_hb_ports"
+				Set-ItemProperty -Path $regPathGroup -Name $regName -Value $TcpPorts -Type String -Force | Out-Null
+				Set-ItemProperty -Path $regPathGroupX64 -Name $regName -Value $TcpPorts -Type String -Force | Out-Null
+			}
+			Else {
+				Write-Host "Invalid TCP ports specified, TCP ports will not be set"
+			}
+		}
+	}
+	
+	# Notes
+	If ($Notes.Length -gt 0)
+	{
+		$regName = $hostID + "_notes"
+
+		Set-ItemProperty -Path $regPathGroup -Name $regName -Value $Notes -Type String -Force | Out-Null
+		Set-ItemProperty -Path $regPathGroupX64 -Name $regName -Value $Notes -Type String -Force | Out-Null
+	}
+	
+	saveConfig
+}
+
 function Set-ESGroupProperty
 {
     Param(
@@ -511,7 +635,7 @@ function Set-ESVariable
 
 	# Setting a group variable
 	If ($Hostname.Length -eq 0)
-	{	
+	{
 		$regPathGroup = $ESRegPathGroups + "\" + $Group
 		$regPathGroupX64 = $ESRegPathGroupsX64 + "\" + $Group
 
@@ -754,6 +878,7 @@ function Add-ESMaintenance
 #Export-ModuleMember -Function 'Add-ESHost'
 #Export-ModuleMember -Function 'Remove-ESHost'
 #Export-ModuleMember -Function 'Get-ESHosts'
+#Export-ModuleMember -Function 'Set-ESHostProperty'
 
 #Export-ModuleMember -Function 'Add-ESGroup'
 #Export-ModuleMember -Function 'Remove-ESGroup'
