@@ -395,30 +395,34 @@ function Set-ESHostProperty
 	$regName = $hostID + "_hb_options"
 	
 	# Merge existing settings
-	$hbSettings = Get-ItemPropertyValue $regPathGroup -Name $regName
-	$hbTokens = $hbSettings.Split(":");
-	If ($hbTokens.Count -eq 12)
+	try
 	{
-		If ($PSBoundParameters.ContainsKey('EnableAgent') -eq $false) {
-			if ($hbTokens[0] -eq "1") { $EnableAgent = $true }
+		$hbSettings = Get-ItemPropertyValue $regPathGroup -Name $regName
+		$hbTokens = $hbSettings.Split(":");
+		If ($hbTokens.Count -eq 12)
+		{
+			If ($PSBoundParameters.ContainsKey('EnableAgent') -eq $false) {
+				if ($hbTokens[0] -eq "1") { $EnableAgent = $true }
+			}
+			If ($PSBoundParameters.ContainsKey('EnablePing') -eq $false) {
+				If ($hbTokens[1] -eq "0") { $EnablePing = $true }
+			}
+			
+			If ($PSBoundParameters.ContainsKey('PacketCount') -eq $false) { $PacketCount = $hbTokens[2] }
+			If ($PSBoundParameters.ContainsKey('PacketSize') -eq $false) { $PacketSize = $hbTokens[3] }
+			If ($PSBoundParameters.ContainsKey('SuccessPercentage') -eq $false) { $SuccessPercentage = $hbTokens[4] }
+			If ($PSBoundParameters.ContainsKey('RoundTrip') -eq $false) { $RoundTrip = $hbTokens[5] }
+			If ($PSBoundParameters.ContainsKey('RequiredErrorCount') -eq $false) { $RequiredErrorCount = $hbTokens[9] }
+			
+			If ($PSBoundParameters.ContainsKey('RepeatFailed') -eq $false) {
+				If ($hbTokens[10] -eq "0") { $RepeatFailed = $false }
+			}
+			
+			If ($PSBoundParameters.ContainsKey('CollectPingStats') -eq $false) { $CollectPingStats = $hbTokens[11] }
 		}
-		If ($PSBoundParameters.ContainsKey('EnablePing') -eq $false) {
-			If ($hbTokens[1] -eq "0") { $EnablePing = $true }
-		}
-		
-		If ($PSBoundParameters.ContainsKey('PacketCount') -eq $false) { $PacketCount = $hbTokens[2] }
-		If ($PSBoundParameters.ContainsKey('PacketSize') -eq $false) { $PacketSize = $hbTokens[3] }
-		If ($PSBoundParameters.ContainsKey('SuccessPercentage') -eq $false) { $SuccessPercentage = $hbTokens[4] }
-		If ($PSBoundParameters.ContainsKey('RoundTrip') -eq $false) { $RoundTrip = $hbTokens[5] }
-		If ($PSBoundParameters.ContainsKey('RequiredErrorCount') -eq $false) { $RequiredErrorCount = $hbTokens[9] }
-		
-		If ($PSBoundParameters.ContainsKey('RepeatFailed') -eq $false) {
-			If ($hbTokens[10] -eq "0") { $RepeatFailed = $false }
-		}
-		
-		If ($PSBoundParameters.ContainsKey('CollectPingStats') -eq $false) { $CollectPingStats = $hbTokens[11] }
 	}
-	
+	catch {}
+		
 	$regValue = $boolToText[($EnableAgent)] + ":" + $boolToText[($EnablePing)] + ":" + $PacketCount.ToString() + ":" + $PacketSize.ToString() + ":" + $SuccessPercentage.ToString() + ":" + $RoundTrip.ToString() + ":1:500:0:" + $RequiredErrorCount.ToString() + ":" + $boolToText[($RepeatFailed)] + ":" + $boolToText[($CollectPingStats)]
 	Set-ItemProperty -Path $regPathGroup -Name $regName -Value $regValue -Type String -Force | Out-Null
 	Set-ItemProperty -Path $regPathGroupX64 -Name $regName -Value $regValue -Type String -Force | Out-Null
