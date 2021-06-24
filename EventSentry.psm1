@@ -354,7 +354,7 @@ function Set-ESHostProperty
         [Parameter(Mandatory=$false)]
         [string]$TcpPorts,
         [Parameter(Mandatory=$false)]
-        [bool]$RequirePing = $true,
+        [bool]$RequirePing = $false,
         [Parameter(Mandatory=$false)]
         [Int32]$RequiredErrorCount = $true,
         [Parameter(Mandatory=$false)]
@@ -414,6 +414,10 @@ function Set-ESHostProperty
 			If ($PSBoundParameters.ContainsKey('RoundTrip') -eq $false) { $RoundTrip = $hbTokens[5] }
 			If ($PSBoundParameters.ContainsKey('RequiredErrorCount') -eq $false) { $RequiredErrorCount = $hbTokens[9] }
 			
+			If ($PSBoundParameters.ContainsKey('RequirePing') -eq $false) {
+				If ($hbTokens[8] -eq "1") { $RequirePing = $true }
+			}
+
 			If ($PSBoundParameters.ContainsKey('RepeatFailed') -eq $false) {
 				If ($hbTokens[10] -eq "0") { $RepeatFailed = $false }
 			}
@@ -422,8 +426,8 @@ function Set-ESHostProperty
 		}
 	}
 	catch {}
-		
-	$regValue = $boolToText[($EnableAgent)] + ":" + $boolToText[($EnablePing)] + ":" + $PacketCount.ToString() + ":" + $PacketSize.ToString() + ":" + $SuccessPercentage.ToString() + ":" + $RoundTrip.ToString() + ":1:500:0:" + $RequiredErrorCount.ToString() + ":" + $boolToText[($RepeatFailed)] + ":" + $boolToText[($CollectPingStats)]
+	
+	$regValue = $boolToText[($EnableAgent)] + ":" + $boolToText[($EnablePing)] + ":" + $PacketCount.ToString() + ":" + $PacketSize.ToString() + ":" + $SuccessPercentage.ToString() + ":" + $RoundTrip.ToString() + ":1:500:" + $boolToText[($RequirePing)] + ":" + $RequiredErrorCount.ToString() + ":" + $boolToText[($RepeatFailed)] + ":" + $boolToText[($CollectPingStats)]
 	Set-ItemProperty -Path $regPathGroup -Name $regName -Value $regValue -Type String -Force | Out-Null
 	Set-ItemProperty -Path $regPathGroupX64 -Name $regName -Value $regValue -Type String -Force | Out-Null
 
