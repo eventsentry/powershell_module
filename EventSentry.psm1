@@ -1,13 +1,12 @@
-New-Variable -Name 'ESRegPath' -Value 'HKLM:\Software\Wow6432Node\netikus.net\EventSentry\' -Option ReadOnly
+New-Variable -Name 'ESRegPath' -Value 'HKLM:\Software\netikus.net\EventSentry\' -Option ReadOnly
 
-New-Variable -Name 'ESRegPathGroups' -Value 'HKLM:\Software\Wow6432Node\netikus.net\EventSentry\Filtergroups\' -Option ReadOnly
-New-Variable -Name 'ESRegPathGroupsX64' -Value 'HKLM:\Software\netikus.net\EventSentry\Filtergroups\' -Option ReadOnly
+New-Variable -Name 'ESRegPathGroups' -Value 'HKLM:\Software\netikus.net\EventSentry\Filtergroups\' -Option ReadOnly
 
-New-Variable -Name 'ESRegPathAuthenticationHKLM' -Value 'HKLM:\SOFTWARE\WOW6432Node\netikus.net\EventSentry\Authentication\' -Option ReadOnly
-New-Variable -Name 'ESRegPathAuthenticationHKCUx64' -Value 'HKCU:\SOFTWARE\netikus.net\EventSentry\Authentication\' -Option ReadOnly
+New-Variable -Name 'ESRegPathAuthenticationHKLM' -Value 'HKLM:\SOFTWARE\netikus.net\EventSentry\Authentication\' -Option ReadOnly
+New-Variable -Name 'ESRegPathAuthenticationHKCU' -Value 'HKCU:\SOFTWARE\netikus.net\EventSentry\Authentication\' -Option ReadOnly
 
-New-Variable -Name 'ESRegPathTrigger' -Value 'HKLM:\Software\Wow6432Node\netikus.net\EventSentry\Notify\' -Option ReadOnly
-New-Variable -Name 'ESRegPathCollectorDeployConfig' -Value 'HKLM:\Software\Wow6432Node\netikus.net\EventSentry\Collector\' -Option ReadOnly
+New-Variable -Name 'ESRegPathTrigger' -Value 'HKLM:\Software\netikus.net\EventSentry\Notify\' -Option ReadOnly
+New-Variable -Name 'ESRegPathCollectorDeployConfig' -Value 'HKLM:\Software\netikus.net\EventSentry\Collector\' -Option ReadOnly
 
 function GetAuthenticationID($authName)
 {
@@ -63,10 +62,7 @@ function saveConfig
 
 function writeRegistryValueAllPlatforms($regPath, $regName, $regValue, $regType)
 {
-	$regPathX64 = $regPath.Replace("Wow6432Node", "")
-	
 	New-ItemProperty -Path $regPath -Name $regName -Value $regValue -PropertyType $retType -Force | Out-Null
-	New-ItemProperty -Path $regPathX64 -Name $regName -Value $regValue -PropertyType $retType -Force | Out-Null
 }
 
 function FileTimeToLowAndHigh
@@ -257,7 +253,7 @@ function Set-ESAuthPasswordWindows
 							[System.Security.Cryptography.DataProtectionScope]::CurrentUser)
 
 		# Store in registry
-		$regPathPassword = $ESRegPathAuthenticationHKCUx64 + $authID
+		$regPathPassword = $ESRegPathAuthenticationHKCU + $authID
 		New-ItemProperty -Path $regPathPassword -Name 'windows_password' -Value $encryptedBytes -PropertyType Binary -Force | Out-Null
 	}
 	
@@ -303,7 +299,6 @@ function Add-ESGroup
         { throw "Group $Group already exists." }
     
     New-Item -Path $ESRegPathGroups -Name $Group | Out-Null
-	New-Item -Path $ESRegPathGroupsX64 -Name $Group | Out-Null
 	
 	saveConfig
 }
@@ -324,10 +319,8 @@ function Remove-ESGroup
 		{ throw "The specified group $Group does not exist" }
 		
 	$regPathGroup = $ESRegPathGroups + "\" + $Group
-	$regPathGroupX64 = $ESRegPathGroupsX64 + "\" + $Group
 	
 	Remove-Item -Path $regPathGroup -Force
-	Remove-Item -Path $regPathGroupX64 -Force
 	
 	saveConfig
 }
@@ -354,7 +347,7 @@ function Set-ESHostProperty
         [Parameter(Mandatory=$false)]
         [string]$TcpPorts,
         [Parameter(Mandatory=$false)]
-        [bool]$RequirePing = $false,
+        [bool]$RequirePing = $true,
         [Parameter(Mandatory=$false)]
         [Int32]$RequiredErrorCount = $true,
         [Parameter(Mandatory=$false)]
@@ -380,16 +373,13 @@ function Set-ESHostProperty
         { throw "Host $Hostname does not exist in group $Group" }
 
 	$regPathGroup = $ESRegPathGroups + "\" + $Group
-	$regPathGroupX64 = $ESRegPathGroupsX64 + "\" + $Group
 
 	# Always disable SNMP
 	$regName = $hostID + "_snmp_error"
 	Set-ItemProperty -Path $regPathGroup -Name $regName -Value 1 -Type DWORD -Force | Out-Null
-	Set-ItemProperty -Path $regPathGroupX64 -Name $regName -Value 1 -Type DWORD -Force | Out-Null
 	
 	$regName = $hostID + "_hb_customize"
 	Set-ItemProperty -Path $regPathGroup -Name $regName -Value 1 -Type DWORD -Force | Out-Null
-	Set-ItemProperty -Path $regPathGroupX64 -Name $regName -Value 1 -Type DWORD -Force | Out-Null
 	
 	# Read reg value
 	$regName = $hostID + "_hb_options"
@@ -414,10 +404,6 @@ function Set-ESHostProperty
 			If ($PSBoundParameters.ContainsKey('RoundTrip') -eq $false) { $RoundTrip = $hbTokens[5] }
 			If ($PSBoundParameters.ContainsKey('RequiredErrorCount') -eq $false) { $RequiredErrorCount = $hbTokens[9] }
 			
-			If ($PSBoundParameters.ContainsKey('RequirePing') -eq $false) {
-				If ($hbTokens[8] -eq "1") { $RequirePing = $true }
-			}
-
 			If ($PSBoundParameters.ContainsKey('RepeatFailed') -eq $false) {
 				If ($hbTokens[10] -eq "0") { $RepeatFailed = $false }
 			}
@@ -426,10 +412,9 @@ function Set-ESHostProperty
 		}
 	}
 	catch {}
-	
-	$regValue = $boolToText[($EnableAgent)] + ":" + $boolToText[($EnablePing)] + ":" + $PacketCount.ToString() + ":" + $PacketSize.ToString() + ":" + $SuccessPercentage.ToString() + ":" + $RoundTrip.ToString() + ":1:500:" + $boolToText[($RequirePing)] + ":" + $RequiredErrorCount.ToString() + ":" + $boolToText[($RepeatFailed)] + ":" + $boolToText[($CollectPingStats)]
+		
+	$regValue = $boolToText[($EnableAgent)] + ":" + $boolToText[($EnablePing)] + ":" + $PacketCount.ToString() + ":" + $PacketSize.ToString() + ":" + $SuccessPercentage.ToString() + ":" + $RoundTrip.ToString() + ":1:500:0:" + $RequiredErrorCount.ToString() + ":" + $boolToText[($RepeatFailed)] + ":" + $boolToText[($CollectPingStats)]
 	Set-ItemProperty -Path $regPathGroup -Name $regName -Value $regValue -Type String -Force | Out-Null
-	Set-ItemProperty -Path $regPathGroupX64 -Name $regName -Value $regValue -Type String -Force | Out-Null
 
 	# TCP Port(s)
 	If ($TcpPorts.Length -gt 0)
@@ -444,7 +429,6 @@ function Set-ESHostProperty
 			{
 				$regName = $hostID + "_hb_ports"
 				Set-ItemProperty -Path $regPathGroup -Name $regName -Value $TcpPorts -Type String -Force | Out-Null
-				Set-ItemProperty -Path $regPathGroupX64 -Name $regName -Value $TcpPorts -Type String -Force | Out-Null
 			}
 			Else {
 				Write-Host "Invalid TCP ports specified, TCP ports will not be set"
@@ -458,7 +442,6 @@ function Set-ESHostProperty
 		$regName = $hostID + "_notes"
 
 		Set-ItemProperty -Path $regPathGroup -Name $regName -Value $Notes -Type String -Force | Out-Null
-		Set-ItemProperty -Path $regPathGroupX64 -Name $regName -Value $Notes -Type String -Force | Out-Null
 	}
 	
 	saveConfig
@@ -541,12 +524,8 @@ function Set-ESGroupProperty
 		{ throw "Invalid error count, must be a number" }
 	
 	$regPathGroup = $ESRegPathGroups + "\" + $Group
-	$regPathGroupX64 = $ESRegPathGroupsX64 + "\" + $Group
 
 	Set-ItemProperty -Path $regPathGroup -Name $regName -Value $regValue -Type DWORD -Force | Out-Null
-	try {
-		Set-ItemProperty -Path $regPathGroupX64 -Name $regName -Value $regValue -Type DWORD -Force | Out-Null
-	} catch {}
 	
 	saveConfig
 }
@@ -580,22 +559,13 @@ function Add-ESVariable
 	
 	$regName = "var_" + $variableCount + "_name"
 	New-ItemProperty -Path $ESRegPathGroups -Name $regName -Value $Name.ToUpper() -PropertyType String -Force | Out-Null
-	try {
-		New-ItemProperty -Path $ESRegPathGroupsX64 -Name $regName -Value $Name.ToUpper() -PropertyType String -Force | Out-Null
-	} catch {}
 					
 	$regName = "var_" + $variableCount + "_value"
 	New-ItemProperty -Path $ESRegPathGroups -Name $regName -Value $DefaultValue -PropertyType String -Force | Out-Null
-	try {
-		New-ItemProperty -Path $ESRegPathGroupsX64 -Name $regName -Value $DefaultValue -PropertyType String -Force | Out-Null
-	} catch {}
 	
 	++$variableCount
 	
 	Set-ItemProperty -Path $ESRegPathGroups -Name "variables" -Value $variableCount -Force | Out-Null
-	try {
-		Set-ItemProperty -Path $ESRegPathGroupsX64 -Name "variables" -Value $variableCount -Force | Out-Null
-	} catch {}
 	
 	saveConfig
 }
@@ -645,14 +615,10 @@ function Set-ESVariable
 	If ($Hostname.Length -eq 0)
 	{
 		$regPathGroup = $ESRegPathGroups + "\" + $Group
-		$regPathGroupX64 = $ESRegPathGroupsX64 + "\" + $Group
 
 		$regName = "var_" + $variableID + "_value"
 	
 		Set-ItemProperty -Path $regPathGroup -Name $regName -Value $variableValue -Force | Out-Null
-		try {
-			Set-ItemProperty -Path $regPathGroupX64 -Name $regName -Value $variableValue -Force | Out-Null
-		} catch {}
 	}
 }
 
@@ -677,7 +643,6 @@ function Remove-ESHost
         { throw "Host $Hostname does not exist in group $Group" }
 
 	$regPathGroup = $ESRegPathGroups + "\" + $Group
-	$regPathGroupX64 = $ESRegPathGroupsX64 + "\" + $Group
 	
 	$regKey = (Get-ItemProperty $regPathGroup)
 	
@@ -695,10 +660,6 @@ function Remove-ESHost
 				If ($numIndex -eq $hostID)
 				{
 					Remove-ItemProperty -Path $regPathGroup -Name $regName
-					
-					try {
-						Remove-ItemProperty -Path $regPathGroupX64 -Name $regName
-					} catch {}
 				}
 			}
 		}
@@ -733,10 +694,6 @@ function Remove-ESHost
 					}
 					
 					Rename-ItemProperty -Path $regPathGroup -Name $regName -NewName $regNameUpdated
-					
-					try {
-						Rename-ItemProperty -Path $regPathGroupX64 -Name $regName -NewName $regNameUpdated
-					} catch {}
 				}
 			}
 		}
@@ -744,7 +701,6 @@ function Remove-ESHost
 	
 	--$computerCount
 	writeRegistryValueAllPlatforms $regPathGroup "total" $computerCount DWORD
-	writeRegistryValueAllPlatforms $regPathGroupX64 "total" $computerCount DWORD
 	
 	saveConfig
 }
@@ -769,14 +725,12 @@ function Add-ESHost
         { throw "Host $Hostname already exists in group $Group" }
 
     $regPath = $ESRegPathGroups + $Group
-    $regPathX64 = $ESRegPathGroupsX64 + $Group
 	
     $computerCount = Get-HostCount($Group)
     
     $regName = $computerCount
     
     New-ItemProperty -Path $regPath -Name $regName -Value $Hostname -PropertyType String -Force | Out-Null
-	New-ItemProperty -Path $regPathX64 -Name $regName -Value $Hostname -PropertyType String -Force | Out-Null
     
 	If ($IP.length -gt 0)
 	{
