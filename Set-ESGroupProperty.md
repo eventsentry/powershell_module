@@ -22,7 +22,7 @@ Set-ESGroupProperty [-Group] <String> [-PropertyType] <String> [-PropertyValue] 
 ## EXAMPLES
 
 ### Example 1
-```powershell
+```
 PS C:\> {{ Set-ESGroupProperty "Network Devices" RequiredErrorCount 3 }}
 ```
 
@@ -61,7 +61,7 @@ Accept wildcard characters: False
 ```
 
 ### -PropertyValue
-{{ The value of the property to be set, for boolean values use "yes", "no", "true" or "false" }}
+{{ The value of the property to be set }}
 
 ```yaml
 Type: String
@@ -81,7 +81,6 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## INPUTS
 
 ### None
-
 ## OUTPUTS
 
 ### System.Object

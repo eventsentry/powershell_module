@@ -8,7 +8,7 @@ schema: 2.0.0
 # Add-ESVariable
 
 ## SYNOPSIS
-{{ Defines a new variable }}
+{{ Adds a new variable to EventSentry }}
 
 ## SYNTAX
 
@@ -17,12 +17,12 @@ Add-ESVariable [-Name] <String> [-DefaultValue] <String> [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-{{ Defines a new variable }}
+{{ Adds a new variable to EventSentry }}
 
 ## EXAMPLES
 
 ### Example 1
-```powershell
+```
 PS C:\> {{ Add-ESVariable EMAILRECIPIENT first.lastname@yourcompany.com }}
 ```
 
@@ -66,7 +66,6 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## INPUTS
 
 ### None
-
 ## OUTPUTS
 
 ### System.Object

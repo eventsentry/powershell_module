@@ -8,7 +8,7 @@ schema: 2.0.0
 # Remove-ESHost
 
 ## SYNOPSIS
-{{ Removes a host from a group }}
+{{ Removes a host }}
 
 ## SYNTAX
 
@@ -17,12 +17,12 @@ Remove-ESHost [-Group] <String> [-Hostname] <String> [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-{{ Removes a host from a group }}
+{{ Removes a host }}
 
 ## EXAMPLES
 
 ### Example 1
-```powershell
+```
 PS C:\> {{ Remove-ESHost "Default Group" SERVER17 }}
 ```
 
@@ -31,7 +31,7 @@ PS C:\> {{ Remove-ESHost "Default Group" SERVER17 }}
 ## PARAMETERS
 
 ### -Group
-{{ Name of the group from which the host should be removed from }}
+{{ Name of the group the host is a member of }}
 
 ```yaml
 Type: String
@@ -46,7 +46,7 @@ Accept wildcard characters: False
 ```
 
 ### -Hostname
-{{ Host to remove }}
+{{ Name of the host to remove }}
 
 ```yaml
 Type: String
@@ -66,7 +66,6 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## INPUTS
 
 ### None
-
 ## OUTPUTS
 
 ### System.Object
