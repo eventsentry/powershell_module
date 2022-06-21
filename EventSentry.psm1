@@ -622,6 +622,23 @@ function Set-ESVariable
 	}
 }
 
+function Reset-ESSharedSecret
+{
+    Param(
+        [Parameter(Mandatory=$true)]
+        [string]$Hostname
+    )
+    
+    if (ManagementConsoleIsRunning)
+        { throw "EventSentry Management Console is running, only read-only actions can be performed." }
+
+	$regPathCollector = $ESRegPath + "\collector"
+    
+    Set-ItemProperty -Path $regPathCollector -Name "reset_shared_secrets_hosts" -Value $Hostname -Force | Out-Null
+    
+    saveConfig
+}
+
 function Remove-ESHost
 {
     Param(
