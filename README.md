@@ -18,7 +18,7 @@ The EventSentry PowerShell module should automatically, if it does not then exec
 `Import-Module EventSentry`
 
 # Installation
-Download the zip file and extract all files into an **EventSentry** sub folder, in one of the supported modules directories. You can find out which module directories are in PowerShell's search path with the following command:
+Download the zip file (from green "Code" button, then click Download Zip) and extract all files into an **EventSentry** sub folder, in one of the supported modules directories. You can find out which module directories are in PowerShell's search path with the following command:
 
 `$ENV:PSModulePath`
 
@@ -26,6 +26,7 @@ For example:
 ```
 C:\Program Files\WindowsPowerShell\Modules\EventSentry
 C:\Program Files\PowerShell\7\Modules\EventSentry
+C:\Users\[Username]\Documents\WindowsPowerShell\Modules\EventSentry\
 ```
 
 No other steps are necessary to install the EventSentry PowerShell module.
