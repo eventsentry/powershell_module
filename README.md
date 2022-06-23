@@ -23,8 +23,10 @@ Download the zip file and extract all files into an **EventSentry** sub folder, 
 `$ENV:PSModulePath`
 
 For example:
-```C:\Program Files\WindowsPowerShell\Modules\EventSentry
-C:\Program Files\PowerShell\7\Modules\EventSentry```
+```
+C:\Program Files\WindowsPowerShell\Modules\EventSentry
+C:\Program Files\PowerShell\7\Modules\EventSentry
+```
 
 No other steps are necessary to install the EventSentry PowerShell module.
 
