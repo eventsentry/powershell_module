@@ -13,7 +13,7 @@ schema: 2.0.0
 ## SYNTAX
 
 ```
-Remove-ESHost [-Group] <String> [-Hostname] <String> [<CommonParameters>]
+Remove-ESHost [-Group] <String> [-Hostname] <String> [-SaveConfig <Boolean>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -55,6 +55,21 @@ Aliases:
 
 Required: True
 Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -SaveConfig
+{{ Set to $false to prevent the config to be saved automatically, useful when adding many hosts in sequence }}
+
+```yaml
+Type: Boolean
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False

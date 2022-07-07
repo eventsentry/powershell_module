@@ -168,11 +168,11 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -RequiredErrorCount
-{{ Number of errors that are required before a host check is considered failed }}
+### -RequirePing
+{{ Sets whether a successful PING check is required for TCP and/or EventSentry agent checks }}
 
 ```yaml
-Type: Int32
+Type: Boolean
 Parameter Sets: (All)
 Aliases:
 
@@ -183,11 +183,11 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -RequirePing
-{{ Sets whether a successful PING check is required for TCP and/or EventSentry agent checks }}
+### -RequiredErrorCount
+{{ Number of errors that are required before a host check is considered failed }}
 
 ```yaml
-Type: Boolean
+Type: Int32
 Parameter Sets: (All)
 Aliases:
 

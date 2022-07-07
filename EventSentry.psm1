@@ -48,16 +48,9 @@ function TriggerIncrease
 	}
 }
 
-function WriteHeartbeatTriggerFile
-{
-	Out-File -FilePath "$env:SYSTEMROOT\SYSTEM32\eventsentry\eventsentry_hb_svc.reg" 
-}
-
 function saveConfig
 {
 	TriggerIncrease
-	
-	WriteHeartbeatTriggerFile
 }
 
 function writeRegistryValueAllPlatforms($regPath, $regName, $regValue, $regType)
@@ -214,6 +207,15 @@ function GetHostID($Group, $Hostname, $IP)
     }
 
     return $retVal;
+}
+
+function Save-ESConfig
+{
+	saveConfig
+	
+	$trigger = Get-ItemPropertyValue $ESRegPathTrigger -Name "trigger"
+	
+	Write-Host "Config Revision: $trigger"
 }
 
 function Set-ESAuthPasswordWindows
@@ -635,8 +637,8 @@ function Reset-ESSharedSecret
 	$regPathCollector = $ESRegPath + "\collector"
     
     Set-ItemProperty -Path $regPathCollector -Name "reset_shared_secrets_hosts" -Value $Hostname -Force | Out-Null
-    
-    saveConfig
+	
+	saveConfig
 }
 
 function Remove-ESHost
@@ -645,7 +647,9 @@ function Remove-ESHost
         [Parameter(Mandatory=$true)]
         [string]$Group,
         [Parameter(Mandatory=$true)]
-        [string]$Hostname
+        [string]$Hostname,
+		[Parameter(Mandatory=$false)]
+		[bool]$SaveConfig = $true
     )
 
     $ErrorActionPreference = "Stop"
@@ -719,7 +723,8 @@ function Remove-ESHost
 	--$computerCount
 	writeRegistryValueAllPlatforms $regPathGroup "total" $computerCount DWORD
 	
-	saveConfig
+	if ($saveConfig -eq $true)
+		{ saveConfig }
 }
 
 function Add-ESHost
@@ -730,7 +735,9 @@ function Add-ESHost
         [Parameter(Mandatory=$true)]
         [string]$Hostname,
         [Parameter(Mandatory=$false)]
-        [string]$IP
+        [string]$IP,
+		[Parameter(Mandatory=$false)]
+		[bool]$SaveConfig = $true
     )
 
     $ErrorActionPreference = "Stop"
@@ -760,8 +767,9 @@ function Add-ESHost
     $computerCount++
     
 	writeRegistryValueAllPlatforms $regPath "total" $computerCount DWORD
-		
-	saveConfig
+
+	if ($saveConfig -eq $true)
+		{ saveConfig }
 }
 
 function Add-ESMaintenance
@@ -863,6 +871,8 @@ function Add-ESMaintenance
 #Export-ModuleMember -Function 'Remove-ESGroup'
 #Export-ModuleMember -Function 'Test-ESGroup'
 #Export-ModuleMember -Function 'Set-ESGroupProperty'
+
+#Export-ModuleMember -Function 'Save-ESConfig'
 
 #Export-ModuleMember -Function 'Add-ESMaintenance'
 
