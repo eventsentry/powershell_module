@@ -1208,9 +1208,21 @@
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>IPAddress</maml:name>
+          <maml:description>
+            <maml:para>{{ Sets the IP address for a host. Specify empty value to remove IP address. }}</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>Notes</maml:name>
           <maml:description>
-            <maml:para>{{ Sets the notes for the host }}</maml:para>
+            <maml:para>{{ Sets the notes for the host. Specify empty value to remove notes. }}</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
           <dev:type>
@@ -1379,9 +1391,21 @@
         <dev:defaultValue>None</dev:defaultValue>
       </command:parameter>
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>IPAddress</maml:name>
+        <maml:description>
+          <maml:para>{{ Sets the IP address for a host. Specify empty value to remove IP address. }}</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
         <maml:name>Notes</maml:name>
         <maml:description>
-          <maml:para>{{ Sets the notes for the host }}</maml:para>
+          <maml:para>{{ Sets the notes for the host. Specify empty value to remove notes. }}</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
         <dev:type>

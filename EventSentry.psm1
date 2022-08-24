@@ -357,7 +357,9 @@ function Set-ESHostProperty
         [Parameter(Mandatory=$false)]
         [bool]$CollectPingStats = $true,
         [Parameter(Mandatory=$false)]
-        [String]$Notes
+        [String]$Notes,
+        [Parameter(Mandatory=$false)]
+        [String]$IPAddress
     )
 	
 	$boolToText = @{$true = '1'; $false = '0'}
@@ -439,13 +441,35 @@ function Set-ESHostProperty
 	}
 	
 	# Notes
-	If ($Notes.Length -gt 0)
+	If ($PSBoundParameters.ContainsKey('Notes'))
 	{
 		$regName = $hostID + "_notes"
-
-		Set-ItemProperty -Path $regPathGroup -Name $regName -Value $Notes -Type String -Force | Out-Null
+		
+		If ($Notes.Length -gt 0)
+		{
+			Set-ItemProperty -Path $regPathGroup -Name $regName -Value $Notes -Type String -Force | Out-Null
+		}
+		Else
+		{
+			Remove-ItemProperty -Path $regPathGroup -Name $regName -Force | Out-Null
+		}
 	}
 	
+	# IP Address
+	If ($PSBoundParameters.ContainsKey('IPAddress'))
+	{
+		$regName = $hostID + "_ip"
+
+		If ($IPAddress.Length -gt 0)
+		{
+			Set-ItemProperty -Path $regPathGroup -Name $regName -Value $IPAddress -Type String -Force | Out-Null
+		}
+		Else
+		{
+			Remove-ItemProperty -Path $regPathGroup -Name $regName -Force | Out-Null
+		}
+	}
+
 	saveConfig
 }
 
