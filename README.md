@@ -11,7 +11,7 @@ A small number of EventSentry tasks can be automated with the EventSentry PowerS
 
 If you get an error message about the module not being loaded, execute:
 
-`set-executionpolicy remotesigned`
+`Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass`
 
 The EventSentry PowerShell module should automatically, if it does not then execute:
 
