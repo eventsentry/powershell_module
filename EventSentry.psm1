@@ -357,9 +357,7 @@ function Set-ESHostProperty
         [Parameter(Mandatory=$false)]
         [bool]$CollectPingStats = $true,
         [Parameter(Mandatory=$false)]
-        [String]$Notes,
-        [Parameter(Mandatory=$false)]
-        [String]$IPAddress
+        [String]$Notes
     )
 	
 	$boolToText = @{$true = '1'; $false = '0'}
@@ -441,35 +439,13 @@ function Set-ESHostProperty
 	}
 	
 	# Notes
-	If ($PSBoundParameters.ContainsKey('Notes'))
+	If ($Notes.Length -gt 0)
 	{
 		$regName = $hostID + "_notes"
-		
-		If ($Notes.Length -gt 0)
-		{
-			Set-ItemProperty -Path $regPathGroup -Name $regName -Value $Notes -Type String -Force | Out-Null
-		}
-		Else
-		{
-			Remove-ItemProperty -Path $regPathGroup -Name $regName -Force | Out-Null
-		}
+
+		Set-ItemProperty -Path $regPathGroup -Name $regName -Value $Notes -Type String -Force | Out-Null
 	}
 	
-	# IP Address
-	If ($PSBoundParameters.ContainsKey('IPAddress'))
-	{
-		$regName = $hostID + "_ip"
-
-		If ($IPAddress.Length -gt 0)
-		{
-			Set-ItemProperty -Path $regPathGroup -Name $regName -Value $IPAddress -Type String -Force | Out-Null
-		}
-		Else
-		{
-			Remove-ItemProperty -Path $regPathGroup -Name $regName -Force | Out-Null
-		}
-	}
-
 	saveConfig
 }
 
@@ -665,10 +641,31 @@ function Reset-ESSharedSecret
 	saveConfig
 }
 
-function Remove-ESHost
+function Find-ESHostGroup
 {
     Param(
         [Parameter(Mandatory=$true)]
+        [string]$Hostname
+    )
+
+    $regGroups = Get-ChildItem $ESRegPathGroups -ErrorAction SilentlyContinue
+
+    foreach ($key in $regGroups)
+    {
+        $groupName = $key.PSChildName
+        $hostID = GetHostID $groupName $Hostname
+
+        If ($hostID -ne "")
+            { return $groupName }
+    }
+
+    return ""
+}
+
+function Remove-ESHost
+{
+    Param(
+        [Parameter(Mandatory=$false)]
         [string]$Group,
         [Parameter(Mandatory=$true)]
         [string]$Hostname,
@@ -680,7 +677,18 @@ function Remove-ESHost
     
     if (ManagementConsoleIsRunning)
         { throw "EventSentry Management Console is running, only read-only actions can be performed." }
-    
+
+    # If no group specified, search all groups for the host
+    If ([string]::IsNullOrEmpty($Group))
+    {
+        $Group = Find-ESHostGroup $Hostname
+
+        If ([string]::IsNullOrEmpty($Group))
+            { throw "Host $Hostname was not found in any group" }
+
+        Write-Host "$Hostname found in group '$Group'"
+    }
+
 	$computerCount = Get-HostCount($Group)
 	$hostID = GetHostID $Group $Hostname
     
@@ -908,8 +916,8 @@ function Add-ESMaintenance
 # SIG # Begin signature block
 # MIISGwYJKoZIhvcNAQcCoIISDDCCEggCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU1+u/HwesyuOK9k6FJiTCi2Ls
-# vP+ggg54MIIG6DCCBNCgAwIBAgIQd70OBbdZC7YdR2FTHj917TANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUfm4EbSEyLtCouMMlp0Exp7vZ
+# 7Hyggg54MIIG6DCCBNCgAwIBAgIQd70OBbdZC7YdR2FTHj917TANBgkqhkiG9w0B
 # AQsFADBTMQswCQYDVQQGEwJCRTEZMBcGA1UEChMQR2xvYmFsU2lnbiBudi1zYTEp
 # MCcGA1UEAxMgR2xvYmFsU2lnbiBDb2RlIFNpZ25pbmcgUm9vdCBSNDUwHhcNMjAw
 # NzI4MDAwMDAwWhcNMzAwNzI4MDAwMDAwWjBcMQswCQYDVQQGEwJCRTEZMBcGA1UE
@@ -991,16 +999,16 @@ function Add-ESMaintenance
 # NDUgRVYgQ29kZVNpZ25pbmcgQ0EgMjAyMAIMP0bhO0USdbkpjWGhMAkGBSsOAwIa
 # BQCgeDAYBgorBgEEAYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgor
 # BgEEAYI3AgEEMBwGCisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3
-# DQEJBDEWBBTYzO9BOr+N6ZdWZm7n3q/u/zNIlzANBgkqhkiG9w0BAQEFAASCAgAT
-# dnn0ausJLgLQolGXuXktuIIva+ZSRdKAgThkFC64uqbiTpg8KOzGPZaYqAbBaUNm
-# bW3PdCYBfvsSEB9sxQxqNyifb/S1+CzpsUiLT58GeIeR1sdWO8l85ScTmde8VQ40
-# sVVGxALKd6aomzA6qFTJ/DPg9yL9FHIGKQuNh8afIO2x0BLnRLFq6bztX0s/c8y8
-# ns+83WVQfjM6Qx88aG4Xs/crPKxbh3GhSZmIROdrzAmgQ/FqVUpD7tkgIs/XRbIm
-# wd2lC4nd+hd+IR7nWTH5wiWLoQSXUURCL7rliaJuLbd0ccSVpS5DFINm2QsRgo58
-# 1Y/BNCmUkWqsbw2yOX1SjskA+VY+eShJntJDHgyRLq5cauCRXyehPG0ytYVRBZ5d
-# hR75v9SG53Pp52Q7PLMm1uWCosQFe1M77tEibN7CQNuL6Bc/01xtpRMwHniTrODO
-# 3Q+J9sBKssLr/RebFs++4isKQc2jOqA1N8MTmE/KbEqKHblOLRH3vp6uoBwONn1b
-# ZKkRkAcPLk4+4KCY49O6Tiht5ywDEEakh3t5wsgRFxbk4IAkvTn16ND7l3vt+ySN
-# v0HcGLMUMDyWfIfyFNhMKq0CiNhn1W8+4pwk1KyyzpMNuhglAb5taX1Igq90e/uQ
-# t+cFSLmgBVhUeExrGWqmJ5s+LJseJPbN1k0joE4Zqg==
+# DQEJBDEWBBRNmrKdlhMekin1yelqsMy3/2pmZDANBgkqhkiG9w0BAQEFAASCAgAY
+# dHFASI9XM5bLjlmQy9lrJSP1u33dcUlr2SJF1h/smR+lKhWmSVohiWEiDlDP+y4j
+# yICVuk1h1LHLLm6WdTcVUGwhbSLNrLnZL/q5R5EpWiCES80xbs3KKmHStnTAv6wR
+# 3N3rhNc4sl8jhTt62EdqDnQ23emhcF/R3RWkChAZhUO9zxnryize4Wbomu3GXrCd
+# wtvQwB2UG+g9OxVgiM3xGHoTAw0zlhLqeWD9Aue2RsdY4174vHDNUTIls6rJuMiU
+# EaFeqOeyLTqcluZILPhfhE6kAQ5F9BJPRPyy41jaKHWWB0LR7QY28F8BiCj9amyX
+# rjsDXcpwZQhgKEnj7Iz/DLNQzdvyQUBpbSpDfFHHWb8ipUw/ivLYbDiin6or59bg
+# v7IPhOdGTx98L4K1ZAr1DO5p5Rmd/35jmJYUNWDGg5yXgHLufSTLiASW2r083NmB
+# 9oTAng94heUfi/72OjSfez3DtdVchUewmFJLPlHCX5qZ+PHHByvyuGHdzfML4n8x
+# /QRhPT6dtwdVKByn0O7uakKFZp1ZurHMygNvuadX7Jukg4feP8+UrwsPB5nB9shl
+# rvrkQL9Qzx8EAte56mx1VTTJklpvhldqBDoQlxkMjr0W/io+ZrZ/RTUb3LwThRMF
+# NatVergJTsN8B/DH0XCDhMzocEEhbBcx1MQLPJoEGQ==
 # SIG # End signature block
