@@ -13,11 +13,11 @@ schema: 2.0.0
 ## SYNTAX
 
 ```
-Remove-ESHost [-Group] <String> [-Hostname] <String> [-SaveConfig <Boolean>] [<CommonParameters>]
+Remove-ESHost [[-Group] <String>] [-Hostname] <String> [-SaveConfig <Boolean>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-{{ Removes a host }}
+{{ Removes a host from the specified group. If no group is provided, all groups are searched automatically and the host is removed from the first group it is found in. }}
 
 ## EXAMPLES
 
@@ -28,17 +28,24 @@ PS C:\> {{ Remove-ESHost "Default Group" SERVER17 }}
 
 {{ Removes host SERVER17 from Default Group }}
 
+### Example 2
+```
+PS C:\> {{ Remove-ESHost -Hostname SERVER17 }}
+```
+
+{{ Searches all groups for SERVER17 and removes it from the first group it is found in }}
+
 ## PARAMETERS
 
 ### -Group
-{{ Name of the group the host is a member of }}
+{{ Name of the group the host is a member of. If omitted, all groups are searched and the host is removed from the first match. }}
 
 ```yaml
 Type: String
 Parameter Sets: (All)
 Aliases:
 
-Required: True
+Required: False
 Position: 0
 Default value: None
 Accept pipeline input: False
