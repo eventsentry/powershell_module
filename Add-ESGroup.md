@@ -8,7 +8,7 @@ schema: 2.0.0
 # Add-ESGroup
 
 ## SYNOPSIS
-{{ Adds a group }}
+Adds a new EventSentry group.
 
 ## SYNTAX
 
@@ -17,21 +17,25 @@ Add-ESGroup [-Group] <String> [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-{{ Adds a group }}
+The Add-ESGroup cmdlet creates a new EventSentry group in the local EventSentry configuration.
+
+The cmdlet cannot run while the EventSentry Management Console is open. It also checks whether the specified group already exists and throws an error if a duplicate group name is provided.
+
+After the group is created, the EventSentry configuration is saved automatically.
 
 ## EXAMPLES
 
 ### Example 1
-```
-PS C:\> {{ Add-ESGroup Switches }}
+```powershell
+PS C:\> Add-ESGroup -Group Workstations
 ```
 
-{{ Creates the Switches group }}
+Creates an EventSentry group named Workstations.
 
 ## PARAMETERS
 
 ### -Group
-{{ EventSentry Group }}
+Specifies the name of the EventSentry group to create.
 
 ```yaml
 Type: String
