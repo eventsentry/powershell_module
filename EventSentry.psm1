@@ -777,9 +777,10 @@ function Add-ESHost
     if (ManagementConsoleIsRunning)
         { throw "EventSentry Management Console is running, only read-only actions can be performed." }
         
-    if (Check-Host $Group $Hostname $IP -eq 1)
-        { throw "Host $Hostname already exists in group $Group" }
-
+	$existingGroup = Find-ESHostGroup $Hostname
+	if ($existingGroup.Length -gt 0)
+		{ throw "Host $Hostname already exists in group '$existingGroup'" }
+	
     $regPath = $ESRegPathGroups + $Group
 	
     $computerCount = Get-HostCount($Group)
@@ -916,8 +917,8 @@ function Add-ESMaintenance
 # SIG # Begin signature block
 # MIISGwYJKoZIhvcNAQcCoIISDDCCEggCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUfm4EbSEyLtCouMMlp0Exp7vZ
-# 7Hyggg54MIIG6DCCBNCgAwIBAgIQd70OBbdZC7YdR2FTHj917TANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUUQ9vT3hjz5eTLxNuyqCaaObu
+# uJ6ggg54MIIG6DCCBNCgAwIBAgIQd70OBbdZC7YdR2FTHj917TANBgkqhkiG9w0B
 # AQsFADBTMQswCQYDVQQGEwJCRTEZMBcGA1UEChMQR2xvYmFsU2lnbiBudi1zYTEp
 # MCcGA1UEAxMgR2xvYmFsU2lnbiBDb2RlIFNpZ25pbmcgUm9vdCBSNDUwHhcNMjAw
 # NzI4MDAwMDAwWhcNMzAwNzI4MDAwMDAwWjBcMQswCQYDVQQGEwJCRTEZMBcGA1UE
@@ -999,16 +1000,16 @@ function Add-ESMaintenance
 # NDUgRVYgQ29kZVNpZ25pbmcgQ0EgMjAyMAIMP0bhO0USdbkpjWGhMAkGBSsOAwIa
 # BQCgeDAYBgorBgEEAYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgor
 # BgEEAYI3AgEEMBwGCisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3
-# DQEJBDEWBBRNmrKdlhMekin1yelqsMy3/2pmZDANBgkqhkiG9w0BAQEFAASCAgAY
-# dHFASI9XM5bLjlmQy9lrJSP1u33dcUlr2SJF1h/smR+lKhWmSVohiWEiDlDP+y4j
-# yICVuk1h1LHLLm6WdTcVUGwhbSLNrLnZL/q5R5EpWiCES80xbs3KKmHStnTAv6wR
-# 3N3rhNc4sl8jhTt62EdqDnQ23emhcF/R3RWkChAZhUO9zxnryize4Wbomu3GXrCd
-# wtvQwB2UG+g9OxVgiM3xGHoTAw0zlhLqeWD9Aue2RsdY4174vHDNUTIls6rJuMiU
-# EaFeqOeyLTqcluZILPhfhE6kAQ5F9BJPRPyy41jaKHWWB0LR7QY28F8BiCj9amyX
-# rjsDXcpwZQhgKEnj7Iz/DLNQzdvyQUBpbSpDfFHHWb8ipUw/ivLYbDiin6or59bg
-# v7IPhOdGTx98L4K1ZAr1DO5p5Rmd/35jmJYUNWDGg5yXgHLufSTLiASW2r083NmB
-# 9oTAng94heUfi/72OjSfez3DtdVchUewmFJLPlHCX5qZ+PHHByvyuGHdzfML4n8x
-# /QRhPT6dtwdVKByn0O7uakKFZp1ZurHMygNvuadX7Jukg4feP8+UrwsPB5nB9shl
-# rvrkQL9Qzx8EAte56mx1VTTJklpvhldqBDoQlxkMjr0W/io+ZrZ/RTUb3LwThRMF
-# NatVergJTsN8B/DH0XCDhMzocEEhbBcx1MQLPJoEGQ==
+# DQEJBDEWBBSMZEBEXYfNgTndHN22dqik1vIVszANBgkqhkiG9w0BAQEFAASCAgCj
+# 7szkP7bbOIJeeZJtBsT1fuD86+42gYMoDhws36dtZ7m6JyKQbvPzjZ+h/IsKj6bE
+# P8J/Z/EWGNMbOAZQBKq9HutDL5s9pCOhQbTt+WNv0nkVjJUZQ9lWg5vEQ7mR4Pd4
+# KTgV+7xI7mRl8B1C98JNd57J0dudspD+pbgCWdyJFrJZEXJJv+MP3ydRtsn5lMKG
+# NNO7X603wDI0hzQjuLBCvJE5DaHqYiJjd5DIq3ndNsuOrNw0GudwLTDNow4PWOym
+# PzeRlyaTAXqtU0RV4EV6xMyaiimgawkyTizGJZSlYHhp5fHI8RZv3KBfuMVCf5dX
+# wSLcZgIjmhS8fWPD2HjaseI7V4t2cdyU3Ygxo8/rC7R/klYmmPuNN9l/SDq09PVQ
+# ZWWwGKxB/GyiEE+T5I5t4fywbhc6QxuJeWU7QXrtop3wswAWgW8dlNSPpCcYVK4B
+# CvKZTSKdr0mld8AUR44JbqjXxc8gu1xtgBA9IMDsN4NJ1Sa8XUyWWAp1vca9NgA2
+# NfX5eleflYPh1uk1O1on8t2LTQUZUd8HVE2lNW0YoXixfld8d8cJ0m/1msL3iJmo
+# 3bu7jcp4B2B47HQ/ByDHx5ZtCXCPe4KyGCm+yOTxJXi5TeQQmtM6IGpG3+00bk3C
+# UockGKgtXxe4/KPa8hzbBQXibpI9ylONpPZeSgiYOg==
 # SIG # End signature block
