@@ -16,7 +16,7 @@ schema: 2.0.0
 Set-ESHostProperty [-Group] <String> [-Hostname] <String> [-EnableAgent <Boolean>] [-EnablePing <Boolean>]
  [-PacketCount <Int32>] [-PacketSize <Int32>] [-SuccessPercentage <Int32>] [-RoundTrip <Int32>]
  [-TcpPorts <String>] [-RequirePing <Boolean>] [-RequiredErrorCount <Int32>] [-RepeatFailed <Boolean>]
- [-CollectPingStats <Boolean>] [-Notes <String>] [-IPAddress <String>] [<CommonParameters>]
+ [-CollectPingStats <Boolean>] [-Notes <String>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -108,23 +108,8 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -IPAddress
-{{ Sets the IP address for a host. Specify empty value to remove IP address. }}
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
 ### -Notes
-{{ Sets the notes for the host. Specify empty value to remove notes. }}
+{{ Sets the notes for the host }}
 
 ```yaml
 Type: String

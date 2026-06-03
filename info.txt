@@ -1,0 +1,11 @@
+Instructions:
+
+Copy the "EventSentry" directory to 
+
+C:\Users\YOURUSERNAME\Documents\WindowsPowerShell\Modules
+
+(the directories may need to be created) so that you end up with a 
+
+c:\Users\YOURUSERNAME\Documents\WindowsPowerShell\Modules\EventSentry
+
+directory.
