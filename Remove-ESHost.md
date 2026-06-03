@@ -8,7 +8,7 @@ schema: 2.0.0
 # Remove-ESHost
 
 ## SYNOPSIS
-{{ Removes a host }}
+Removes a host from an EventSentry group.
 
 ## SYNTAX
 
@@ -17,28 +17,39 @@ Remove-ESHost [[-Group] <String>] [-Hostname] <String> [-SaveConfig <Boolean>] [
 ```
 
 ## DESCRIPTION
-{{ Removes a host from the specified group. If no group is provided, all groups are searched automatically and the host is removed from the first group it is found in. }}
+The Remove-ESHost cmdlet removes a host from an EventSentry group in the local EventSentry configuration.
+
+The cmdlet cannot run while the EventSentry Management Console is open. If you do not specify a group, the cmdlet searches all EventSentry groups and removes the host from the first group where it is found.
+
+After the host is removed, the remaining hosts in the group are renumbered and the group host count is updated. By default, the EventSentry configuration is saved after the host is removed. Use the SaveConfig parameter to defer saving when removing multiple hosts in sequence.
 
 ## EXAMPLES
 
 ### Example 1
-```
-PS C:\> {{ Remove-ESHost "Default Group" SERVER17 }}
+```powershell
+PS C:\> Remove-ESHost -Group "Default Group" -Hostname SERVER17
 ```
 
-{{ Removes host SERVER17 from Default Group }}
+Removes the host SERVER17 from the EventSentry group named Default Group.
 
 ### Example 2
-```
-PS C:\> {{ Remove-ESHost -Hostname SERVER17 }}
+```powershell
+PS C:\> Remove-ESHost -Hostname SERVER17
 ```
 
-{{ Searches all groups for SERVER17 and removes it from the first group it is found in }}
+Searches all EventSentry groups for SERVER17 and removes it from the first group where it is found.
+
+### Example 3
+```powershell
+PS C:\> Remove-ESHost -Group Workstations -Hostname DESKTOP01 -SaveConfig $false
+```
+
+Removes DESKTOP01 from the Workstations group without immediately saving the EventSentry configuration.
 
 ## PARAMETERS
 
 ### -Group
-{{ Name of the group the host is a member of. If omitted, all groups are searched and the host is removed from the first match. }}
+Specifies the name of the EventSentry group that contains the host. If this parameter is omitted, all groups are searched and the host is removed from the first matching group.
 
 ```yaml
 Type: String
@@ -53,7 +64,7 @@ Accept wildcard characters: False
 ```
 
 ### -Hostname
-{{ Name of the host to remove }}
+Specifies the name of the host to remove.
 
 ```yaml
 Type: String
@@ -68,7 +79,7 @@ Accept wildcard characters: False
 ```
 
 ### -SaveConfig
-{{ Set to $false to prevent the config to be saved automatically, useful when adding many hosts in sequence }}
+Specifies whether to save the EventSentry configuration after the host is removed. The default value is $true. Set this parameter to $false when removing multiple hosts and call Save-ESConfig after the batch is complete.
 
 ```yaml
 Type: Boolean
