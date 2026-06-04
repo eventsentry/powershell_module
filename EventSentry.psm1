@@ -45,6 +45,8 @@ function TriggerIncrease
 		Start-Process $remoteUpdateUtility -Wait -ArgumentList "/exportconfig" -NoNewWindow -RedirectStandardOutput ".\NUL"
 		
 		writeRegistryValueAllPlatforms $ESRegPathTrigger "trigger_approved_for_deploy" $trigger DWORD
+		
+		Write-Verbose "Trigger increased to $trigger"
 	}
 }
 
@@ -55,7 +57,7 @@ function saveConfig
 
 function writeRegistryValueAllPlatforms($regPath, $regName, $regValue, $regType)
 {
-	New-ItemProperty -Path $regPath -Name $regName -Value $regValue -PropertyType $retType -Force | Out-Null
+	New-ItemProperty -Path $regPath -Name $regName -Value $regValue -PropertyType $regType -Force | Out-Null
 }
 
 function FileTimeToLowAndHigh
@@ -80,26 +82,33 @@ function Get-HostCount($Group)
 {
     $ErrorActionPreference = "Stop"
     
-    If ($Group.length -eq 0) { throw "No group specified" }
+    If ($Group.length -eq 0) 
+	{ 
+		Write-Error "No group specified"
+		return
+	}
     
     $regPath = $ESRegPathGroups + $Group
+	
+	$computerCount = 0
     
     try
     {
         $regKey = (Get-ItemProperty $regPath)
-    }
-    catch { throw "Group does not exist" }
-    
-    $computerCount = 0
 
-    $regKey.PSObject.Properties | ForEach-Object {
-        If ($_.Name -eq "total")
-        {
-            #Write-Host $_.Name ' = ' $_.Value
-            $computerCount = $_.Value
-        }
+		$regKey.PSObject.Properties | ForEach-Object {
+			If ($_.Name -eq "total")
+			{
+				#Write-Host $_.Name ' = ' $_.Value
+				$computerCount = $_.Value
+			}
+		}
     }
-
+    catch 
+	{
+		Write-Verbose "Group does not exist" 
+	}
+	
     return $computerCount;
 }
 
@@ -123,7 +132,7 @@ function IsValidNumber
 	If ([Int32]::TryParse($numberToCheck,[ref]$numIndex))
 		{ return $true }
 	Else
-		{ Write-Host "$numberToCheck is not a number" }
+		{ Write-Verbose "$numberToCheck is not a number" }
 		
 	return $false
 }
@@ -139,16 +148,8 @@ function Get-ESHosts
     $regPath = $ESRegPathGroups + $Group
     
     $computerCount = Get-HostCount($Group)
-    
-    $regKey.PSObject.Properties | ForEach-Object {
-        If ($_.Name -eq 'total')
-        {
-            #Write-Host $_.Name ' = ' $_.Value
-            $computerCount = $_.Value
-        }
-    }
 
-    for ($i = 0; $i -lt $computerCount; $i++) 
+    For ($i = 0; $i -lt $computerCount; $i++) 
     {
         $regValueIp = $i.ToString() + "_ip"
 
@@ -234,14 +235,20 @@ function Set-ESAuthPasswordWindows
 	$authID = GetAuthenticationID($AuthName)
 	
 	If ($authID.length -eq 0)
-		{ throw "The specified authentication name cannot be found" }
+	{ 
+		Write-Error "The authentication credentials $AuthName cannot be found"
+		return
+	}
 	Else
 	{
 		# Verify this is windows-only authentication
 		$regPathHKLM = $ESRegPathAuthenticationHKLM + $authID		
-		$regValue = Get-ItemProperty -Path $regPathHKLM -Name 'windows_login' -ErrorAction SilentlyContinue
-		if ($regValue.length -eq 0)
-			{ throw "The password for the specififed authentication credentials cannot be updated since they are SNMP-only credentials" }
+		$regValue = Get-ItemPropertyValue -Path $regPathHKLM -Name 'windows_login' -ErrorAction SilentlyContinue
+		if ([string]::IsNullOrEmpty($regValue))
+		{ 
+			Write-Warning "The password for the specififed authentication credentials cannot be updated since they are SNMP-only credentials"
+			return
+		}
 
 		# Create encrypted password
 		Add-Type -AssemblyName System.Security
@@ -257,6 +264,8 @@ function Set-ESAuthPasswordWindows
 		# Store in registry
 		$regPathPassword = $ESRegPathAuthenticationHKCU + $authID
 		New-ItemProperty -Path $regPathPassword -Name 'windows_password' -Value $encryptedBytes -PropertyType Binary -Force | Out-Null
+		
+		Write-Verbose "Windows authentication credentials $AuthName updated successfully"
 	}
 	
 	Remove-Variable -Name AuthPassword -Force -ErrorAction SilentlyContinue
@@ -298,9 +307,14 @@ function Add-ESGroup
         { throw "EventSentry Management Console is running, only read-only actions can be performed." }
         
     If (Test-ESGroup $Group)
-        { throw "Group $Group already exists." }
+    { 
+		Write-Warning "Group $Group already exists"
+		return
+	}
     
     New-Item -Path $ESRegPathGroups -Name $Group | Out-Null
+	
+	Write-Verbose "Group $Group added"
 	
 	saveConfig
 }
@@ -318,7 +332,10 @@ function Remove-ESGroup
         
 	$groupExists = Test-ESGroup $Group
 	If ($groupExists -eq $false)
-		{ throw "The specified group $Group does not exist" }
+	{ 
+		Write-Error "Group $Group does not exist"
+		return
+	}
 		
 	$regPathGroup = $ESRegPathGroups + "\" + $Group
 	
@@ -351,7 +368,7 @@ function Set-ESHostProperty
         [Parameter(Mandatory=$false)]
         [bool]$RequirePing = $true,
         [Parameter(Mandatory=$false)]
-        [Int32]$RequiredErrorCount = $true,
+        [Int32]$RequiredErrorCount = 1,
         [Parameter(Mandatory=$false)]
         [bool]$RepeatFailed = $true,
         [Parameter(Mandatory=$false)]
@@ -367,12 +384,18 @@ function Set-ESHostProperty
 
 	$groupExists = Test-ESGroup $Group
 	If ($groupExists -eq $false)
-		{ throw "The specified group $Group does not exist" }
+	{ 
+		Write-Error "The specified group $Group does not exist"
+		return
+	}
 		
 	$hostID = GetHostID $Group $Hostname
     
     If ($hostID -eq "")
-        { throw "Host $Hostname does not exist in group $Group" }
+    { 
+		Write-Error "Host $Hostname does not exist in group $Group"
+		return
+	}
 
 	$regPathGroup = $ESRegPathGroups + "\" + $Group
 
@@ -391,13 +414,14 @@ function Set-ESHostProperty
 	{
 		$hbSettings = Get-ItemPropertyValue $regPathGroup -Name $regName
 		$hbTokens = $hbSettings.Split(":");
+		
 		If ($hbTokens.Count -eq 12)
 		{
 			If ($PSBoundParameters.ContainsKey('EnableAgent') -eq $false) {
-				if ($hbTokens[0] -eq "1") { $EnableAgent = $true }
+				If ($hbTokens[0] -eq "1") { $EnableAgent = $true }
 			}
 			If ($PSBoundParameters.ContainsKey('EnablePing') -eq $false) {
-				If ($hbTokens[1] -eq "0") { $EnablePing = $true }
+				If ($hbTokens[1] -eq "1") { $EnablePing = $true }
 			}
 			
 			If ($PSBoundParameters.ContainsKey('PacketCount') -eq $false) { $PacketCount = $hbTokens[2] }
@@ -423,18 +447,23 @@ function Set-ESHostProperty
 	{
 		$tcpTokens = $TcpPorts.Split(":");
 		
-		For ($i = 0; $i -lt $tcpTokens.Count; $i++)
+		$allValid = $true
+		
+		foreach ($token in $tcpTokens)
 		{
 			[Int32]$numPort = $null
-
-			If ([Int32]::TryParse($tcpTokens[$i],[ref]$numPort))
+			if (-not [Int32]::TryParse($token, [ref]$numPort))
 			{
-				$regName = $hostID + "_hb_ports"
-				Set-ItemProperty -Path $regPathGroup -Name $regName -Value $TcpPorts -Type String -Force | Out-Null
+				Write-Warning "Invalid TCP port '$token' specified, TCP ports will not be set"
+				$allValid = $false
+				break
 			}
-			Else {
-				Write-Host "Invalid TCP ports specified, TCP ports will not be set"
-			}
+		}
+		
+		if ($allValid)
+		{
+			$regName = $hostID + "_hb_ports"
+			Set-ItemProperty -Path $regPathGroup -Name $regName -Value $TcpPorts -Type String -Force | Out-Null
 		}
 	}
 	
@@ -465,7 +494,10 @@ function Set-ESGroupProperty
 
 	$groupExists = Test-ESGroup $Group
 	If ($groupExists -eq $false)
-		{ throw "The specified group $Group does not exist" }
+	{ 
+		Write-Error "Group $Group does not exist"
+		return
+	}
 		
 	$PropertyValue = $PropertyValue.ToLower()
 		
@@ -520,10 +552,16 @@ function Set-ESGroupProperty
 	}
 
 	If ($regName.Length -eq 0)
-		{ throw "Unsupported property type specified" }
+	{ 
+		Write-Error "Unsupported property type specified"
+		return
+	}
 		
 	If ($hasToBeNumber -And $isValidNumber -eq $false)
-		{ throw "Invalid error count, must be a number" }
+	{ 
+		Write-Error "Invalid error count, must be a number"
+		return
+	}
 	
 	$regPathGroup = $ESRegPathGroups + "\" + $Group
 
@@ -556,7 +594,10 @@ function Add-ESVariable
 		$variableName = Get-ItemPropertyValue $ESRegPathGroups -Name $regName
 		
 		If ($variableName -eq $Name)
-			{ throw "Variable $Name already exists" }
+		{ 
+			Write-Warning "Variable $Name already exists"
+			return
+		}
 	}
 	
 	$regName = "var_" + $variableCount + "_name"
@@ -568,6 +609,9 @@ function Add-ESVariable
 	++$variableCount
 	
 	Set-ItemProperty -Path $ESRegPathGroups -Name "variables" -Value $variableCount -Force | Out-Null
+	
+	Write-Verbose "Variable $Name with default value $DefaultValue successfully added"
+	Write-Verbose "Total Variables: $variableCount"
 	
 	saveConfig
 }
@@ -591,7 +635,10 @@ function Set-ESVariable
 
 	$groupExists = Test-ESGroup $Group
 	If ($groupExists -eq $false)
-		{ throw "The specified group $Group does not exist" }
+	{
+		Write-Error "Group $Group does not exist"
+		return
+	}
 		
 	# Get variable ID
 	$variableID = -1
@@ -611,17 +658,23 @@ function Set-ESVariable
 	}
 	
 	if ($variableID -lt 0)
-		{ throw "Variable $variableName does not exist and cannot be set" }
+	{
+		Write-Error "Variable $variableName does not exist and cannot be set"
+		return
+	}
 
 	# Setting a group variable
-	If ($Hostname.Length -eq 0)
-	{
+	#If ($Hostname.Length -eq 0)
+	#{
 		$regPathGroup = $ESRegPathGroups + "\" + $Group
 
 		$regName = "var_" + $variableID + "_value"
 	
 		Set-ItemProperty -Path $regPathGroup -Name $regName -Value $variableValue -Force | Out-Null
-	}
+	#}
+	# add Else when support for $Hostname is added
+	
+	saveConfig
 }
 
 function Reset-ESSharedSecret
@@ -639,6 +692,8 @@ function Reset-ESSharedSecret
     Set-ItemProperty -Path $regPathCollector -Name "reset_shared_secrets_hosts" -Value $Hostname -Force | Out-Null
 	
 	saveConfig
+	
+	Write-Verbose "Shared secret reset for $Hostname initiated"
 }
 
 function Find-ESHostGroup
@@ -684,16 +739,24 @@ function Remove-ESHost
         $Group = Find-ESHostGroup $Hostname
 
         If ([string]::IsNullOrEmpty($Group))
-            { throw "Host $Hostname was not found in any group" }
-
-        Write-Host "$Hostname found in group '$Group'"
+        {
+			Write-Warning "Host $Hostname was not found in any group"
+			return
+		}
+		Else
+		{
+			Write-Verbose "$Hostname found in group '$Group'"
+		}
     }
 
 	$computerCount = Get-HostCount($Group)
 	$hostID = GetHostID $Group $Hostname
     
     If ($hostID -eq "")
-        { throw "Host $Hostname does not exist in group $Group" }
+    {
+		Write-Warning "Host $Hostname does not exist in group $Group"
+		return
+	}
 
 	$regPathGroup = $ESRegPathGroups + "\" + $Group
 	
@@ -755,6 +818,8 @@ function Remove-ESHost
 	--$computerCount
 	writeRegistryValueAllPlatforms $regPathGroup "total" $computerCount DWORD
 	
+	Write-Verbose "Host $Hostname successfully removed from $Group"
+	
 	if ($saveConfig -eq $true)
 		{ saveConfig }
 }
@@ -771,15 +836,23 @@ function Add-ESHost
 		[Parameter(Mandatory=$false)]
 		[bool]$SaveConfig = $true
     )
-
-    $ErrorActionPreference = "Stop"
     
     if (ManagementConsoleIsRunning)
         { throw "EventSentry Management Console is running, only read-only actions can be performed." }
+		
+	$groupExists = Test-ESGroup $Group
+	If ($groupExists -eq $false)
+	{ 
+		Write-Warning "Group $Group does not exist"
+		return
+	}
         
 	$existingGroup = Find-ESHostGroup $Hostname
 	if ($existingGroup.Length -gt 0)
-		{ throw "Host $Hostname already exists in group '$existingGroup'" }
+	{ 
+		Write-Warning "Host $Hostname already exists in group '$existingGroup'"
+		return
+	}
 	
     $regPath = $ESRegPathGroups + $Group
 	
@@ -800,6 +873,8 @@ function Add-ESHost
     $computerCount++
     
 	writeRegistryValueAllPlatforms $regPath "total" $computerCount DWORD
+	
+	Write-Verbose "Host $Hostname successfully added to $Group"
 
 	if ($saveConfig -eq $true)
 		{ saveConfig }
@@ -822,8 +897,11 @@ function Add-ESMaintenance
         { throw "EventSentry Management Console is running, only read-only actions can be performed." }
     
 	$hostExists = Check-Host $Group $Hostname    
-    if ($hostExists -eq 0)
-        { throw "Host $Hostname does not exist in group $Group" }
+    If ($hostExists -eq 0)
+    { 
+		Write-Warning "Host $Hostname does not exist in group $Group" 
+		return
+	}
 		
     $hostID = GetHostID $Group $Hostname
 	
@@ -891,6 +969,8 @@ function Add-ESMaintenance
 	
 	Write-Host "Maintenance Schedule" $maintScheduleCount "added successfully (" $timeStart "to" $timeEnd ")"
 	
+	Write-Verbose "Maintenance schedule for $Hostname successfully set"
+	
 	saveConfig
 }
 
@@ -903,6 +983,7 @@ function Add-ESMaintenance
 #Export-ModuleMember -Function 'Add-ESGroup'
 #Export-ModuleMember -Function 'Remove-ESGroup'
 #Export-ModuleMember -Function 'Test-ESGroup'
+#Export-ModuleMember -Function 'Find-ESHostGroup'
 #Export-ModuleMember -Function 'Set-ESGroupProperty'
 
 #Export-ModuleMember -Function 'Save-ESConfig'
@@ -917,8 +998,8 @@ function Add-ESMaintenance
 # SIG # Begin signature block
 # MIISGwYJKoZIhvcNAQcCoIISDDCCEggCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUUQ9vT3hjz5eTLxNuyqCaaObu
-# uJ6ggg54MIIG6DCCBNCgAwIBAgIQd70OBbdZC7YdR2FTHj917TANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUNu1X9qAeylv7c58DPbsmUEUx
+# Uq+ggg54MIIG6DCCBNCgAwIBAgIQd70OBbdZC7YdR2FTHj917TANBgkqhkiG9w0B
 # AQsFADBTMQswCQYDVQQGEwJCRTEZMBcGA1UEChMQR2xvYmFsU2lnbiBudi1zYTEp
 # MCcGA1UEAxMgR2xvYmFsU2lnbiBDb2RlIFNpZ25pbmcgUm9vdCBSNDUwHhcNMjAw
 # NzI4MDAwMDAwWhcNMzAwNzI4MDAwMDAwWjBcMQswCQYDVQQGEwJCRTEZMBcGA1UE
@@ -1000,16 +1081,16 @@ function Add-ESMaintenance
 # NDUgRVYgQ29kZVNpZ25pbmcgQ0EgMjAyMAIMP0bhO0USdbkpjWGhMAkGBSsOAwIa
 # BQCgeDAYBgorBgEEAYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgor
 # BgEEAYI3AgEEMBwGCisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3
-# DQEJBDEWBBSMZEBEXYfNgTndHN22dqik1vIVszANBgkqhkiG9w0BAQEFAASCAgCj
-# 7szkP7bbOIJeeZJtBsT1fuD86+42gYMoDhws36dtZ7m6JyKQbvPzjZ+h/IsKj6bE
-# P8J/Z/EWGNMbOAZQBKq9HutDL5s9pCOhQbTt+WNv0nkVjJUZQ9lWg5vEQ7mR4Pd4
-# KTgV+7xI7mRl8B1C98JNd57J0dudspD+pbgCWdyJFrJZEXJJv+MP3ydRtsn5lMKG
-# NNO7X603wDI0hzQjuLBCvJE5DaHqYiJjd5DIq3ndNsuOrNw0GudwLTDNow4PWOym
-# PzeRlyaTAXqtU0RV4EV6xMyaiimgawkyTizGJZSlYHhp5fHI8RZv3KBfuMVCf5dX
-# wSLcZgIjmhS8fWPD2HjaseI7V4t2cdyU3Ygxo8/rC7R/klYmmPuNN9l/SDq09PVQ
-# ZWWwGKxB/GyiEE+T5I5t4fywbhc6QxuJeWU7QXrtop3wswAWgW8dlNSPpCcYVK4B
-# CvKZTSKdr0mld8AUR44JbqjXxc8gu1xtgBA9IMDsN4NJ1Sa8XUyWWAp1vca9NgA2
-# NfX5eleflYPh1uk1O1on8t2LTQUZUd8HVE2lNW0YoXixfld8d8cJ0m/1msL3iJmo
-# 3bu7jcp4B2B47HQ/ByDHx5ZtCXCPe4KyGCm+yOTxJXi5TeQQmtM6IGpG3+00bk3C
-# UockGKgtXxe4/KPa8hzbBQXibpI9ylONpPZeSgiYOg==
+# DQEJBDEWBBQMav+IO2tz9DMOyLlMRY7PPbQFozANBgkqhkiG9w0BAQEFAASCAgBh
+# Dl/vovtYd1buIj8Q6Xr0i3KF3YLPuq8xU45GRJWs5AOKDxDndSh98Q1pFClTPr4n
+# 30BnNx4DrOHKPCkWlQ0YFBjq3R4yoD5+fZayB54IaP7GRpRxurnO90QGPwi88hQG
+# l3eSabaQgI8fK6EcF54AxWpBZA6hRC4+Os0ltFwWcXsqvOlM2xKi8OLT3KYMsyGI
+# srpG7LQWRZy4YNXFrcSgn7/0wWPOe+rzi6wQXP0+uF1De4YXm8wtmYN/QooWDukI
+# cbPkPkOvKQoaH6AzVzjdp5T6hsCyAuxtgjv1ZxjkDVDBeFGr+VRdORcIDCIZpiQe
+# O8tVLKgmdPDQawv4RenwI/dWHxHyZ0c74uhh6rMpLnd94a91FedX26sNthtdW7/I
+# mxkMHPNDNjtTYu3jWnoX6nADrsrBPseSJB+JCyE4vBoptz8sMCTkI34JYoF9+q/n
+# 1TzJNW0TYNRiWdzpx12QZU6XYZqQo/u6gDVwk0ym/LJSgOG5NYIzREs71KjThm0A
+# NFZF+y9qLmX9jyhSs2gCe+YD2tXGM0n9g8ouWgvaHNddvFL48QK4J193q5D3X9rB
+# NhD/OA0YbxM8z/nsKajGJEbwOweLsoWdoAODFrJqAKnF8viNL8LCP7bmv0kCBepC
+# lcOavAKZceSAe4gJzSkHI1D8RI4gj5lO5VmKxBNuaw==
 # SIG # End signature block
