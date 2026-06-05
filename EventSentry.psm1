@@ -114,8 +114,8 @@ function Get-HostCount($Group)
 
 function ManagementConsoleIsRunning
 {
-    $guiIsActive32 = Get-Process eventsentry_gui -ErrorAction SilentlyContinue
-    $guiIsActive64 = Get-Process eventsentry_gui_x64 -ErrorAction SilentlyContinue
+    $guiIsActive32 = Get-Process eventsentry_gui -ErrorAction Ignore
+    $guiIsActive64 = Get-Process eventsentry_gui_x64 -ErrorAction Ignore
     
     return $guiIsActive32 -or $guiIsActive64
 }
@@ -998,8 +998,8 @@ function Add-ESMaintenance
 # SIG # Begin signature block
 # MIISGwYJKoZIhvcNAQcCoIISDDCCEggCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUNu1X9qAeylv7c58DPbsmUEUx
-# Uq+ggg54MIIG6DCCBNCgAwIBAgIQd70OBbdZC7YdR2FTHj917TANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUx6H+9es3YRWrbY6q7tb5vHpm
+# cG6ggg54MIIG6DCCBNCgAwIBAgIQd70OBbdZC7YdR2FTHj917TANBgkqhkiG9w0B
 # AQsFADBTMQswCQYDVQQGEwJCRTEZMBcGA1UEChMQR2xvYmFsU2lnbiBudi1zYTEp
 # MCcGA1UEAxMgR2xvYmFsU2lnbiBDb2RlIFNpZ25pbmcgUm9vdCBSNDUwHhcNMjAw
 # NzI4MDAwMDAwWhcNMzAwNzI4MDAwMDAwWjBcMQswCQYDVQQGEwJCRTEZMBcGA1UE
@@ -1081,16 +1081,16 @@ function Add-ESMaintenance
 # NDUgRVYgQ29kZVNpZ25pbmcgQ0EgMjAyMAIMP0bhO0USdbkpjWGhMAkGBSsOAwIa
 # BQCgeDAYBgorBgEEAYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgor
 # BgEEAYI3AgEEMBwGCisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3
-# DQEJBDEWBBQMav+IO2tz9DMOyLlMRY7PPbQFozANBgkqhkiG9w0BAQEFAASCAgBh
-# Dl/vovtYd1buIj8Q6Xr0i3KF3YLPuq8xU45GRJWs5AOKDxDndSh98Q1pFClTPr4n
-# 30BnNx4DrOHKPCkWlQ0YFBjq3R4yoD5+fZayB54IaP7GRpRxurnO90QGPwi88hQG
-# l3eSabaQgI8fK6EcF54AxWpBZA6hRC4+Os0ltFwWcXsqvOlM2xKi8OLT3KYMsyGI
-# srpG7LQWRZy4YNXFrcSgn7/0wWPOe+rzi6wQXP0+uF1De4YXm8wtmYN/QooWDukI
-# cbPkPkOvKQoaH6AzVzjdp5T6hsCyAuxtgjv1ZxjkDVDBeFGr+VRdORcIDCIZpiQe
-# O8tVLKgmdPDQawv4RenwI/dWHxHyZ0c74uhh6rMpLnd94a91FedX26sNthtdW7/I
-# mxkMHPNDNjtTYu3jWnoX6nADrsrBPseSJB+JCyE4vBoptz8sMCTkI34JYoF9+q/n
-# 1TzJNW0TYNRiWdzpx12QZU6XYZqQo/u6gDVwk0ym/LJSgOG5NYIzREs71KjThm0A
-# NFZF+y9qLmX9jyhSs2gCe+YD2tXGM0n9g8ouWgvaHNddvFL48QK4J193q5D3X9rB
-# NhD/OA0YbxM8z/nsKajGJEbwOweLsoWdoAODFrJqAKnF8viNL8LCP7bmv0kCBepC
-# lcOavAKZceSAe4gJzSkHI1D8RI4gj5lO5VmKxBNuaw==
+# DQEJBDEWBBR4Ez8zh4Yt8A/okvJK6eVotxIPEjANBgkqhkiG9w0BAQEFAASCAgA5
+# 0QLwMokXPiTr1IQScBoJ3gohe++UEcEttb5qOpTeVvoLFl0j3VRuxae4sKWTpYCk
+# Kc5xUopJD1IALaEgSoTKn/uA6+/Lw1gJWBOyPdvWNDPpDdjZFvqwXlFty+C0AxgF
+# stIgu+Mq2PH6mejMefFeNgWI4X/2N9QhDWQZIF08cuYvWpajNsXnZiTlyTCpopLv
+# Z6sKzNqoDxGYAMjppLuk2AunC9a+6wZRckJSVPnEeLvhxN9aPSV5c2gTQlrjQPFe
+# u1rFRkycuG+03IH/41zSLwby075Rka7eAgLYjaoFpCjiVKaJwwLiyHPUodBmx7IZ
+# h11BdlkqXQm7IljGLMGle2Z9nYzsjScOIW5rZQQO3ny5sbvzUg0bWaTN7RygJAu4
+# PrcRCisRgHg1E8u7FdGMvfPAUyXNc3gSBVnHUOCF/xLusXl4AM0FyUpp4Jx6lf4D
+# gjhVBbBG/ZqSSpXY+FKzE12PicPZ1ncwLUAyVr8IQo4Zp7NduCPVd6Xcc9+TIMyc
+# Gm7kltzTaaWI67LSR0TNHIxDJoOAbmMw9BInclQzmxF70bVkFLAj6qr6yHSxI+U9
+# CqKbRCafbGUfFXsyT2F3TEr/78QZF2pmkioir8mYgbyPAnr8XM4U4uupeJrM6FBn
+# T7Q+m4cysa9nk82x30x+audSUyS8pLTdklITo0SbPw==
 # SIG # End signature block
