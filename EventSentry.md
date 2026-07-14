@@ -1,8 +1,8 @@
 ---
 Module Name: EventSentry
 Module Guid: 29a62f1c-cf59-4abf-8e52-9055926fffff
-Download Help Link: {{ Update Download Link }}
-Help Version: {{ 6.0.1.68 }}
+Download Help Link: https://github.com/eventsentry/powershell_module
+Help Version: 6.0.1.68
 Locale: en-US
 ---
 
