@@ -2,54 +2,55 @@
 Module Name: EventSentry
 Module Guid: 29a62f1c-cf59-4abf-8e52-9055926fffff
 Download Help Link: {{ Update Download Link }}
-Help Version: {{ Please enter version of help manually (X.X.X.X) format }}
+Help Version: {{ 6.0.1.68 }}
 Locale: en-US
 ---
 
 # EventSentry Module
 ## Description
-{{ Fill in the Description }}
+{{ Various cmdlets for automating EventSentry tasks }}
 
 ## EventSentry Cmdlets
+
 ### [Add-ESGroup](Add-ESGroup.md)
-{{ Fill in the Description }}
+{{ Adds a group }}
 
 ### [Add-ESHost](Add-ESHost.md)
-{{ Fill in the Description }}
+{{ Adds a host to a group }}
 
 ### [Import-ESHosts](Import-ESHosts.md)
 {{ Imports hosts from a CSV file, creating groups as needed }}
 
 ### [Add-ESMaintenance](Add-ESMaintenance.md)
-{{ Fill in the Description }}
+{{ Adds a maintenance schedule to a host }}
 
 ### [Add-ESVariable](Add-ESVariable.md)
-{{ Fill in the Description }}
+{{ Adds a new variable }}
 
 ### [Get-ESHosts](Get-ESHosts.md)
-{{ Fill in the Description }}
+{{ Displays all hosts of a group }}
 
 ### [Remove-ESGroup](Remove-ESGroup.md)
-{{ Fill in the Description }}
+{{ Deletes a group }}
 
 ### [Remove-ESHost](Remove-ESHost.md)
-{{ Fill in the Description }}
+{{ Removes a host from a group }}
 
 ### [Reset-ESSharedSecret](Reset-ESSharedSecret.md)
-{{ Fill in the Description }}
+{{ Resets the shared secret of one or more hosts with the collector }}
 
 ### [Set-ESAuthPasswordWindows](Set-ESAuthPasswordWindows.md)
-{{ Fill in the Description }}
+{{ Updates the Windows password for the specified authentication credentials }}
 
 ### [Set-ESGroupProperty](Set-ESGroupProperty.md)
-{{ Fill in the Description }}
+{{ Customizes heartbeat monitoring settings for a group }}
 
 ### [Set-ESHostProperty](Set-ESHostProperty.md)
-{{ Fill in the Description }}
+{{ Sets notes or custom heartbeat properties for a host }}
 
 ### [Set-ESVariable](Set-ESVariable.md)
-{{ Fill in the Description }}
+{{ Sets the value of a variable for the specified group }}
 
 ### [Test-ESGroup](Test-ESGroup.md)
-{{ Fill in the Description }}
+{{ Verifies that a group exists }}
 
