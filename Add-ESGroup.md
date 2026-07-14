@@ -8,34 +8,37 @@ schema: 2.0.0
 # Add-ESGroup
 
 ## SYNOPSIS
-Adds a new EventSentry group.
+{{ Adds a group }}
 
 ## SYNTAX
 
 ```
-Add-ESGroup [-Group] <String> [<CommonParameters>]
+Add-ESGroup [-Group] <String> [-GroupType <ESGroupType>] [-SaveConfig <Boolean>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-The Add-ESGroup cmdlet creates a new EventSentry group in the local EventSentry configuration.
-
-The cmdlet cannot run while the EventSentry Management Console is open. It also checks whether the specified group already exists and throws an error if a duplicate group name is provided.
-
-After the group is created, the EventSentry configuration is saved automatically.
+{{ Adds a group }}
 
 ## EXAMPLES
 
 ### Example 1
-```powershell
-PS C:\> Add-ESGroup -Group Workstations
+```
+PS C:\> {{ Add-ESGroup Switches }}
 ```
 
-Creates an EventSentry group named Workstations.
+{{ Creates the Switches group with the default group type Full }}
+
+### Example 2
+```
+PS C:\> {{ Add-ESGroup Switches -GroupType HeartbeatOnly }}
+```
+
+{{ Creates the Switches group as a heartbeat-only group }}
 
 ## PARAMETERS
 
 ### -Group
-Specifies the name of the EventSentry group to create.
+{{ EventSentry Group }}
 
 ```yaml
 Type: String
@@ -45,6 +48,37 @@ Aliases:
 Required: True
 Position: 0
 Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -GroupType
+{{ Type of the group, one of Full, HeartbeatOnly or ManageOnly. Defaults to Full }}
+
+```yaml
+Type: ESGroupType
+Parameter Sets: (All)
+Aliases:
+Accepted values: ManageOnly, Full, HeartbeatOnly
+
+Required: False
+Position: Named
+Default value: Full
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -SaveConfig
+{{ Set to $false to prevent the config to be saved automatically, useful when adding many groups in sequence }}
+
+```yaml
+Type: Boolean
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: True
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
@@ -61,3 +95,5 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## NOTES
 
 ## RELATED LINKS
+
+[Import-ESHosts](Import-ESHosts.md)

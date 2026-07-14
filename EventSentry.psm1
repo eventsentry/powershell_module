@@ -1,3 +1,10 @@
+enum ESGroupType
+{
+	ManageOnly    = 0
+	Full          = 1
+	HeartbeatOnly = 2
+}
+
 New-Variable -Name 'ESRegPath' -Value 'HKLM:\Software\netikus.net\EventSentry\' -Option ReadOnly
 
 New-Variable -Name 'ESRegPathGroups' -Value 'HKLM:\Software\netikus.net\EventSentry\Filtergroups\' -Option ReadOnly
@@ -298,25 +305,28 @@ function Test-ESGroup
 function Add-ESGroup
 {
     Param(
-        [Parameter(Mandatory=$true)]
-        [string]$Group
+        [Parameter(Mandatory=$true,Position=0)]
+        [string]$Group,
+        [Parameter(Mandatory=$false)]
+        [ESGroupType]$GroupType = [ESGroupType]::Full,
+        [Parameter(Mandatory=$false)]
+        [bool]$SaveConfig = $true
     )
     $ErrorActionPreference = "Stop"
-    
+ 
     If (ManagementConsoleIsRunning)
         { throw "EventSentry Management Console is running, only read-only actions can be performed." }
-        
+ 
     If (Test-ESGroup $Group)
-    { 
-		Write-Warning "Group $Group already exists"
-		return
-	}
-    
+        { throw "Group $Group already exists." }
+ 
+	$regPathGroup = $ESRegPathGroups + $Group
     New-Item -Path $ESRegPathGroups -Name $Group | Out-Null
 	
-	Write-Verbose "Group $Group added"
-	
-	saveConfig
+	writeRegistryValueAllPlatforms $regPathGroup "GroupType" ([int]$GroupType) DWORD
+ 
+    If ($SaveConfig -eq $true)
+        { saveConfig }
 }
 
 function Remove-ESGroup
@@ -878,6 +888,108 @@ function Add-ESHost
 
 	if ($saveConfig -eq $true)
 		{ saveConfig }
+}
+
+function Import-ESHosts
+{
+    Param(
+        [Parameter(Mandatory=$true,Position=0)]
+        [string]$Path,
+        [Parameter(Mandatory=$false)]
+        [ESGroupType]$GroupType = [ESGroupType]::Full,
+        [Parameter(Mandatory=$false)]
+        [string]$Delimiter = ',',
+        [Parameter(Mandatory=$false)]
+        [bool]$SaveConfig = $true
+    )
+
+    $ErrorActionPreference = "Stop"
+
+    If (ManagementConsoleIsRunning)
+        { throw "EventSentry Management Console is running, only read-only actions can be performed." }
+
+    If ((Test-Path -Path $Path -PathType Leaf) -eq $false)
+        { throw "The specified file $Path does not exist" }
+
+    # The CSV file has no header row, the columns are: Groupname,Hostname,IP (IP is optional)
+    $csvRows = @(Import-Csv -Path $Path -Delimiter $Delimiter -Header 'Groupname','Hostname','IP')
+
+    If ($csvRows.Count -eq 0)
+        { throw "The specified file $Path does not contain any rows" }
+
+    $countHostsAdded  = 0
+    $countGroupsAdded = 0
+    $countSkipped     = 0
+    $rowNumber        = 0
+
+    ForEach ($row in $csvRows)
+    {
+        ++$rowNumber
+
+        $csvGroup    = If ($null -ne $row.Groupname) { $row.Groupname.Trim() } Else { "" }
+        $csvHostname = If ($null -ne $row.Hostname)  { $row.Hostname.Trim() }  Else { "" }
+        $csvIP       = If ($null -ne $row.IP)        { $row.IP.Trim() }        Else { "" }
+
+        # Skip empty lines
+        If ($csvGroup.Length -eq 0 -And $csvHostname.Length -eq 0)
+            { continue }
+
+        If ($csvGroup.Length -eq 0)
+        {
+            Write-Warning "Row $rowNumber : No group specified, skipping"
+            ++$countSkipped
+            continue
+        }
+
+        If ($csvHostname.Length -eq 0)
+        {
+            Write-Warning "Row $rowNumber : No hostname specified, skipping"
+            ++$countSkipped
+            continue
+        }
+
+        # Create the group if it doesn't exist yet. SaveConfig is suppressed, the config is
+        # saved once after the import completes.
+        If ((Test-ESGroup $csvGroup) -eq $false)
+        {
+            try
+            {
+                Add-ESGroup -Group $csvGroup -GroupType $GroupType -SaveConfig $false
+                ++$countGroupsAdded
+
+                Write-Verbose "Group '$csvGroup' created"
+            }
+            catch
+            {
+                Write-Warning "Row $rowNumber : Group '$csvGroup' could not be created - $($_.Exception.Message)"
+                ++$countSkipped
+                continue
+            }
+        }
+
+        # Skip hosts that already exist in any group. Add-ESHost only issues a warning in that
+        # case and does not throw, so the check has to happen here for the counters to be correct.
+        $existingGroup = Find-ESHostGroup $csvHostname
+
+        If ($existingGroup.Length -gt 0)
+        {
+            Write-Warning "Row $rowNumber : Host $csvHostname already exists in group '$existingGroup', skipping"
+            ++$countSkipped
+            continue
+        }
+
+        If ($csvIP.Length -gt 0)
+            { Add-ESHost -Group $csvGroup -Hostname $csvHostname -IP $csvIP -SaveConfig $false }
+        Else
+            { Add-ESHost -Group $csvGroup -Hostname $csvHostname -SaveConfig $false }
+
+        ++$countHostsAdded
+    }
+
+    Write-Host "Import complete: $countHostsAdded host(s) added, $countGroupsAdded group(s) created, $countSkipped row(s) skipped"
+
+    If ($SaveConfig -eq $true -And ($countHostsAdded -gt 0 -Or $countGroupsAdded -gt 0))
+        { saveConfig }
 }
 
 function Add-ESMaintenance
